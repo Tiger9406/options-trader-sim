@@ -1,0 +1,19 @@
+# cmake stuff
+cmake-build-*/
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+Makefile
+build.ninja
+
+# CLION specific
+.idea/
+*.iml
+
+# compiled files
+*.o
+*.obj
+*.so
+*.exe
+*.out
+
