@@ -18,11 +18,12 @@ options using the Black-Scholes formula), and will later include a frontend user
 - C++ pricing engine complete for European call/put
 
 ### In Progress:
-- American options, Greeks, and portfolio simulation in progress  
+- Greeks
 
 ### Planned:
 - React frontend
 - American options
+- Portfolio simulation
 
 ## Build & Run (C++ backend)
 

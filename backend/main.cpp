@@ -1,5 +1,5 @@
 #include <iostream>
-#include "src/EuropeanOption.h"
+#include "EuropeanOption.h"
 using namespace std;
 
 int main() {

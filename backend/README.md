@@ -20,8 +20,12 @@ backend/
     main.cpp
     README.md
     src/
-      EuropeanOption.cpp
-      EuropeanOption.hpp
+        european/
+            EuropeanOption.cpp
+            EuropeanOption.hpp
+        greeks/
+            Greeks.cpp
+            Greeks.h
 ```
 
 ## Functionality
