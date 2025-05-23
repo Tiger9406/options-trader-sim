@@ -11,6 +11,7 @@ I hope to learn the mathematical reasoning behind options pricing, focusing on s
 
 - European call and put pricing via Black-Scholes
 - Console interface
+- OOP style options with inheritance for better system design
 
 ## Project Structure
 
@@ -22,16 +23,17 @@ backend/
     src/
         european/
             EuropeanOption.cpp
-            EuropeanOption.hpp
-        greeks/
-            Greeks.cpp
-            Greeks.h
+            EuropeanOption.h
+        option/
+            Option.h
+        shared/
+            OptionType.h
 ```
 
 ## Functionality
 
-This simulator models a European-style option using:
-
+### European
+This simulator generates a price for European options using the Black-Scholes Model:
 ```
 Call = S * N(d1) - K * e^(-rT) * N(d2)
 ```
@@ -44,3 +46,10 @@ The model calculates fair value based on:
 - Time to expiration (T)
 - Risk-free rate (r)
 - Volatility (σ)
+
+It calculates the "greeks," metrics used in options pricing using the Black Scholes model:
+- Delta: rate of change of option price w/ respect to underlying/spot price
+- Gamma: rate of change of Delta w/ respect to underlying price; second derivative
+- Vega: Sensitivity of option price to 1% difference in sigma/volatility
+- Theta: Sensitivity of option price w/ respect to passage of time: T decrease
+- Rho: Sensitivity of option price to a 1% change in risk-free interest rate

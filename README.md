@@ -16,9 +16,10 @@ options using the Black-Scholes formula), and will later include a frontend user
 
 ### Completed:
 - C++ pricing engine complete for European call/put
+- European Options Greeks
 
 ### In Progress:
-- Greeks
+- American Options pricing & greeks
 
 ### Planned:
 - React frontend
