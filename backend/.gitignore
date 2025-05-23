@@ -7,7 +7,7 @@ Makefile
 build.ninja
 
 # CLION specific
-.idea/
+../.idea/
 *.iml
 
 # compiled files
