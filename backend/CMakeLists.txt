@@ -3,13 +3,16 @@ project(options_simulator)
 
 set(CMAKE_CXX_STANDARD 17)
 
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/src/european)
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/src/greeks)
+include_directories(
+        src
+        src/shared
+        src/european
+        src/option
+)
 
 # define static library for later development
 add_library(core STATIC
         src/european/EuropeanOption.cpp
-        src/greeks/Greeks.cpp
 )
 
 # execute for testing

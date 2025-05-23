@@ -5,23 +5,20 @@
 #ifndef OPTIONS_SIMULATOR_EUROPEANOPTION_H
 #define OPTIONS_SIMULATOR_EUROPEANOPTION_H
 
-//have to clearly distinguish between call & put
-enum class OptionType {CALL, PUT};
+#include "option.h"
 
-class EuropeanOption {
+class EuropeanOption: public Option {
 public:
-    EuropeanOption(double spot_price, double exercise_price, double interest_rate,
-                   double time_expiry, double volatility, OptionType type);
-    double getPrice() const;
+    EuropeanOption(double S_, double K_, double r_, double sigma_, double T_, OptionType type_);
+    double price() const override;
+    double delta() const override;
+    double gamma() const override;
+    double vega() const override;
+    double theta() const override;
+    double rho() const override;
 private:
-    double spot_price;
-    double exercise_price;
-    double interest_rate;
-    double time_expiry;
-    double volatility;
-    OptionType type;
-    double calculateBlackScholesPrice() const;
-    double normCDF(double x) const;
+    static double normCDF(double x) ;
+    static double normPDF(double x) ;
 };
 
 
