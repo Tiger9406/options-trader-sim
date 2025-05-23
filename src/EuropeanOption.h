@@ -21,6 +21,7 @@ private:
     double volatility;
     OptionType type;
     double calculateBlackScholesPrice() const;
+    double normCDF(double x) const;
 };
 
 
