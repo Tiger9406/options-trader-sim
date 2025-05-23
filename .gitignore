@@ -1,5 +1,5 @@
 # cmake stuff
-cmake-build-*/
+backend/cmake-build-debug/
 CMakeFiles/
 CMakeCache.txt
 cmake_install.cmake
@@ -7,7 +7,7 @@ Makefile
 build.ninja
 
 # CLION specific
-../.idea/
+.idea/
 *.iml
 
 # compiled files
