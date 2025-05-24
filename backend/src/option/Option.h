@@ -5,7 +5,7 @@
 #ifndef OPTIONS_SIMULATOR_OPTION_H
 #define OPTIONS_SIMULATOR_OPTION_H
 
-#include "OptionType.h"
+#include "../shared/OptionType.h"
 
 class Option {
 protected:

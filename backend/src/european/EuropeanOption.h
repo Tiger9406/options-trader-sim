@@ -5,11 +5,12 @@
 #ifndef OPTIONS_SIMULATOR_EUROPEANOPTION_H
 #define OPTIONS_SIMULATOR_EUROPEANOPTION_H
 
-#include "option.h"
+#include "../option/Option.h"
+#include "../shared/OptionType.h"
 
-class EuropeanOption: public Option {
+class EuropeanOptionInheritance: public Option {
 public:
-    EuropeanOption(double S_, double K_, double r_, double sigma_, double T_, OptionType type_);
+    EuropeanOptionInheritance(double S_, double K_, double r_, double sigma_, double T_, OptionType type_);
     double price() const override;
     double delta() const override;
     double gamma() const override;
@@ -19,6 +20,12 @@ public:
 private:
     static double normCDF(double x) ;
     static double normPDF(double x) ;
+};
+
+struct EuropeanOption{
+    double S, K, T, r, sigma;
+    OptionType type;
+    EuropeanOption(double S_, double K_, double r_, double sigma_, double T_, OptionType type_) : S(S_), K(K_), T(T_), r(r_), sigma(sigma_), type(type_){}
 };
 
 

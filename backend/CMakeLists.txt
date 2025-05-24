@@ -3,13 +3,6 @@ project(options_simulator)
 
 set(CMAKE_CXX_STANDARD 17)
 
-include_directories(
-        src
-        src/shared
-        src/european
-        src/option
-)
-
 # define static library for later development
 add_library(core STATIC
         src/european/EuropeanOption.cpp
@@ -18,5 +11,27 @@ add_library(core STATIC
 # execute for testing
 add_executable(options_simulator main.cpp)
 
+target_include_directories(options_simulator PRIVATE
+        src
+        src/shared
+        src/european
+        src/option
+        src/pricing
+)
+
 #link
 target_link_libraries(options_simulator core)
+
+add_executable(performance_test
+        tests/performance_test.cpp
+)
+
+target_include_directories(performance_test PRIVATE
+        src
+        src/shared
+        src/european
+        src/option
+        src/pricing
+)
+
+target_link_libraries(performance_test core) # Needed if still using EuropeanOptionInheritance
