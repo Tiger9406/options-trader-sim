@@ -17,14 +17,19 @@ options using the Black-Scholes formula), and will later include a frontend user
 ### Completed:
 - C++ pricing engine complete for European call/put
 - European Options Greeks
+- Adapting into template style for European
+- Benchmarking
+- 
 
 ### In Progress:
-- American Options pricing & greeks
+- Separating
 
 ### Planned:
+- American options: binomial trees or numerical PDE methods
+- Portfolio simulation: track cash balance, option positions, etc. Methods like buy, sell 
+- Market Simulation: Simulate realistic market conditions: volatility, price movements
+- Strategies/Backtesting
 - React frontend
-- American options
-- Portfolio simulation
 
 ## Build & Run (C++ backend)
 

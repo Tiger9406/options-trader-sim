@@ -11,7 +11,13 @@ I hope to learn the mathematical reasoning behind options pricing, focusing on s
 
 - European call and put pricing via Black-Scholes
 - Console interface
-- OOP style options with inheritance for better system design
+- OOP style options with inheritance for system design
+- Template style instead of inheritance
+
+## Previous Progression:
+- European call & put as a class
+- Insertion of inheritance anticipating types of options
+- Moving to templates for faster resolving behavior at compile time, inline execution, no heap allocation, & no vtable lookup
 
 ## Project Structure
 
@@ -26,8 +32,11 @@ backend/
             EuropeanOption.h
         option/
             Option.h
+        pricing/
+            BlackScholes.h
         shared/
             OptionType.h
+            MathUtil.h
 ```
 
 ## Functionality

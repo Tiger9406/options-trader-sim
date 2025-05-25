@@ -64,6 +64,7 @@ void benchmarkBothImplementations(int numOptions) {
     std::chrono::duration<double, std::milli> inheritanceTime = end - start;
     std::cout << "[Construction] Inheritance options took " << inheritanceTime.count() << " ms\n";
 
+
     // ===== TEMPLATE BASED BENCHMARKS =====
     std::cout << "\n[Template-Based Implementation]\n";
 
@@ -102,6 +103,7 @@ void benchmarkBothImplementations(int numOptions) {
         for (const auto& opt : optionsTemplate) sum += BlackScholes<EuropeanOption>::rho(opt);
         return sum;
     });
+
 
     // ===== VIRTUAL BASED BENCHMARKS =====
     std::cout << "\n[Virtual (Inheritance) Implementation]\n";
