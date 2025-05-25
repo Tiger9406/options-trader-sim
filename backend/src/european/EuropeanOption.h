@@ -17,9 +17,6 @@ public:
     double vega() const override;
     double theta() const override;
     double rho() const override;
-private:
-    static double normCDF(double x) ;
-    static double normPDF(double x) ;
 };
 
 struct EuropeanOption{

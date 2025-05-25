@@ -4,6 +4,7 @@
 
 #include "EuropeanOption.h"
 #include <cmath>
+#include "../shared/MathUtils.h"
 using namespace std;
 
 EuropeanOptionInheritance::EuropeanOptionInheritance(double S_, double K_, double r_, double sigma_, double T_, OptionType type_)
@@ -21,15 +22,6 @@ double EuropeanOptionInheritance::price() const {
         return normCDF(d1)*S-normCDF(d2)*K*exp(-r*T);
     else
         return normCDF(-d2)*K*exp(-r*T)-normCDF(-d1)*S;
-}
-
-double EuropeanOptionInheritance::normCDF(double x) {
-    //probability that random var following a normal distribution, <= given x
-    return erfc(-x/sqrt(2))/2;
-}
-
-double EuropeanOptionInheritance::normPDF(double x) {
-    return (1/sqrt(2*M_PI))*exp(-x*x/2);
 }
 
 double EuropeanOptionInheritance::delta() const {
