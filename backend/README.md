@@ -10,14 +10,17 @@ I hope to learn the mathematical reasoning behind options pricing, focusing on s
 ## Current Features
 
 - European call and put pricing via Black-Scholes
+  - OOP style options
+  - Generic European Option Template
+  - (Fastest) Separate Call & Put Options
 - Console interface
-- OOP style options with inheritance for system design
 - Template style instead of inheritance
 
 ## Previous Progression:
 - European call & put as a class
 - Insertion of inheritance anticipating types of options
 - Moving to templates for faster resolving behavior at compile time, inline execution, no heap allocation, & no vtable lookup
+- Separate call and put options for reduced branching for template
 
 ## Project Structure
 
@@ -62,3 +65,6 @@ It calculates the "greeks," metrics used in options pricing using the Black Scho
 - Vega: Sensitivity of option price to 1% difference in sigma/volatility
 - Theta: Sensitivity of option price w/ respect to passage of time: T decrease
 - Rho: Sensitivity of option price to a 1% change in risk-free interest rate
+
+Having undergone several implementations of this, concluded that separate types (Calls, Puts) Templates
+is fastest and most logical in large scale.

@@ -19,13 +19,13 @@ options using the Black-Scholes formula), and will later include a frontend user
 - European Options Greeks
 - Adapting into template style for European
 - Benchmarking
-- 
+- Separating Call & Put for European
+
 
 ### In Progress:
-- Separating
+- American options: binomial trees or numerical PDE methods
 
 ### Planned:
-- American options: binomial trees or numerical PDE methods
 - Portfolio simulation: track cash balance, option positions, etc. Methods like buy, sell 
 - Market Simulation: Simulate realistic market conditions: volatility, price movements
 - Strategies/Backtesting
