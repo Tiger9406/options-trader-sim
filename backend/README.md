@@ -33,6 +33,8 @@ backend/
         european/
             EuropeanOption.cpp
             EuropeanOption.h
+        american/
+            AmericanOption.h
         option/
             Option.h
         pricing/
@@ -68,3 +70,5 @@ It calculates the "greeks," metrics used in options pricing using the Black Scho
 
 Having undergone several implementations of this, concluded that separate types (Calls, Puts) Templates
 is fastest and most logical in large scale.
+
+### American
