@@ -3,13 +3,14 @@
 #include <random>
 #include <chrono>
 #include <memory>
+#include <functional>
 #include "EuropeanOption.h"
 #include "BlackScholes.h"
 #include "OptionType.h"
 #include "AmericanOption.h"
 #include "BinomialTree.h"
 
-// Utility function to measure and return execution time in milliseconds
+// Timing utility
 template<typename Func>
 double benchmark(const std::string& label, Func func) {
     auto start = std::chrono::high_resolution_clock::now();
@@ -20,286 +21,133 @@ double benchmark(const std::string& label, Func func) {
     return duration.count();
 }
 
-void benchmarkBothImplementations(int numOptions) {
-    std::vector<EuropeanOption> optionsTemplate;
-    std::vector<std::unique_ptr<Option>> optionsVirtual;
+// given container, do sum of function over all items in container
+template<typename Container, typename Func>
+double applyAndSum(const Container& container, Func func) {
+    double sum = 0.0;
+    for (const auto& item : container) sum += func(item);
+    return sum;
+}
 
-    std::random_device rd;
-    std::mt19937 gen(rd());
-    std::uniform_real_distribution<double> spot(90, 110);
-    std::uniform_real_distribution<double> strike(90, 110);
-    std::uniform_real_distribution<double> rate(0.01, 0.05);
-    std::uniform_real_distribution<double> vol(0.05, 0.3);
-    std::uniform_real_distribution<double> expiry(0.1, 2.0);
-    std::bernoulli_distribution typeDist(0.5);
+// using applyAndSum do all prices and greeks; only for europeans as of now, american greeks not implemented
+template<typename Container, typename Engine>
+double benchmarkGreeks(const Container& options, const std::string& prefix, Engine) {
+    double total = 0.0;
+    total += benchmark(prefix + "Price", [&]() { return applyAndSum(options, Engine::price); });
+    total += benchmark(prefix + "Delta", [&]() { return applyAndSum(options, Engine::delta); });
+    total += benchmark(prefix + "Gamma", [&]() { return applyAndSum(options, Engine::gamma); });
+    total += benchmark(prefix + "Vega",  [&]() { return applyAndSum(options, Engine::vega); });
+    total += benchmark(prefix + "Theta", [&]() { return applyAndSum(options, Engine::theta); });
+    total += benchmark(prefix + "Rho",   [&]() { return applyAndSum(options, Engine::rho); });
+    return total;
+}
 
-    // Generate random market parameters
-    std::vector<std::tuple<double, double, double, double, double, OptionType>> optionParams;
-    optionParams.reserve(numOptions);
-
-    for (int i = 0; i < numOptions; ++i) {
-        optionParams.emplace_back(
+struct RandomGenerator {
+    std::mt19937 gen;
+    std::uniform_real_distribution<double> spot{90, 110};
+    std::uniform_real_distribution<double> strike{90, 110};
+    std::uniform_real_distribution<double> rate{0.01, 0.05};
+    std::uniform_real_distribution<double> vol{0.05, 0.3};
+    std::uniform_real_distribution<double> expiry{0.1, 2.0};
+    std::bernoulli_distribution callPut{0.5};
+    //construct
+    RandomGenerator() : gen(std::random_device{}()) {}
+    //to generate
+    auto generateOptionParams() {
+        return std::make_tuple(
                 spot(gen),
                 strike(gen),
                 rate(gen),
                 vol(gen),
                 expiry(gen),
-                typeDist(gen) ? Call : Put
+                callPut(gen) ? Call : Put
         );
     }
+};
+// template generic vs virtual
+void benchmarkBothImplementations(int numOptions) {
+    std::vector<EuropeanOption> optionsTemplate;
+    std::vector<std::unique_ptr<Option>> optionsVirtual;
 
-    // === Construct Template Options ===
-    auto start = std::chrono::high_resolution_clock::now();
-    for (const auto& [S, K, r, sigma, T, type] : optionParams) {
+    RandomGenerator rng;
+    for (int i = 0; i < numOptions; ++i) {
+        auto [S, K, r, sigma, T, type] = rng.generateOptionParams();
         optionsTemplate.emplace_back(S, K, r, sigma, T, type);
-    }
-    auto end = std::chrono::high_resolution_clock::now();
-    std::chrono::duration<double, std::milli> templateTime = end - start;
-    std::cout << "[Construction] Template options took " << templateTime.count() << " ms\n";
-
-    // === Construct Inheritance Options ===
-    start = std::chrono::high_resolution_clock::now();
-    for (const auto& [S, K, r, sigma, T, type] : optionParams) {
         optionsVirtual.emplace_back(std::make_unique<EuropeanOptionInheritance>(S, K, r, sigma, T, type));
     }
-    end = std::chrono::high_resolution_clock::now();
-    std::chrono::duration<double, std::milli> inheritanceTime = end - start;
-    std::cout << "[Construction] Inheritance options took " << inheritanceTime.count() << " ms\n";
 
-
-    // ===== TEMPLATE BASED BENCHMARKS =====
-    std::cout << "\n[Template-Based Implementation]\n";
-
-    double total_time = 0.0;
-
-    total_time+=benchmark("Price", [&]() {
-        double sum = 0.0;
-        for (const auto& opt : optionsTemplate) sum += BlackScholesGeneric<EuropeanOption>::price(opt);
-        return sum;
-    });
-
-    total_time+=benchmark("Delta", [&]() {
-        double sum = 0.0;
-        for (const auto& opt : optionsTemplate) sum += BlackScholesGeneric<EuropeanOption>::delta(opt);
-        return sum;
-    });
-
-    total_time+=benchmark("Gamma", [&]() {
-        double sum = 0.0;
-        for (const auto& opt : optionsTemplate) sum += BlackScholesGeneric<EuropeanOption>::gamma(opt);
-        return sum;
-    });
-
-    total_time+=benchmark("Vega", [&]() {
-        double sum = 0.0;
-        for (const auto& opt : optionsTemplate) sum += BlackScholesGeneric<EuropeanOption>::vega(opt);
-        return sum;
-    });
-
-    total_time+=benchmark("Theta", [&]() {
-        double sum = 0.0;
-        for (const auto& opt : optionsTemplate) sum += BlackScholesGeneric<EuropeanOption>::theta(opt);
-        return sum;
-    });
-
-    total_time+=benchmark("Rho", [&]() {
-        double sum = 0.0;
-        for (const auto& opt : optionsTemplate) sum += BlackScholesGeneric<EuropeanOption>::rho(opt);
-        return sum;
-    });
-
-    std::cout<< "Total Calculation Time: "<<total_time<<"\n";
-
-
-    // ===== VIRTUAL BASED BENCHMARKS =====
     std::cout << "\n[Virtual (Inheritance) Implementation]\n";
-    total_time=0.0;
+    double totalVirtual = 0.0;
+    totalVirtual += benchmark("Price", [&]() { return applyAndSum(optionsVirtual, [](const auto& o) { return o->price(); }); });
+    totalVirtual += benchmark("Delta", [&]() { return applyAndSum(optionsVirtual, [](const auto& o) { return o->delta(); }); });
+    totalVirtual += benchmark("Gamma", [&]() { return applyAndSum(optionsVirtual, [](const auto& o) { return o->gamma(); }); });
+    totalVirtual += benchmark("Vega",  [&]() { return applyAndSum(optionsVirtual, [](const auto& o) { return o->vega(); }); });
+    totalVirtual += benchmark("Theta", [&]() { return applyAndSum(optionsVirtual, [](const auto& o) { return o->theta(); }); });
+    totalVirtual += benchmark("Rho",   [&]() { return applyAndSum(optionsVirtual, [](const auto& o) { return o->rho(); }); });
+    std::cout << "Total Calculation Time: " << totalVirtual << " ms\n";
 
-    total_time+=benchmark("Price", [&]() {
-        double sum = 0.0;
-        for (const auto& opt : optionsVirtual) sum += opt->price();
-        return sum;
-    });
-
-    total_time+=benchmark("Delta", [&]() {
-        double sum = 0.0;
-        for (const auto& opt : optionsVirtual) sum += opt->delta();
-        return sum;
-    });
-
-    total_time+=benchmark("Gamma", [&]() {
-        double sum = 0.0;
-        for (const auto& opt : optionsVirtual) sum += opt->gamma();
-        return sum;
-    });
-
-    total_time+=benchmark("Vega", [&]() {
-        double sum = 0.0;
-        for (const auto& opt : optionsVirtual) sum += opt->vega();
-        return sum;
-    });
-
-    total_time+=benchmark("Theta", [&]() {
-        double sum = 0.0;
-        for (const auto& opt : optionsVirtual) sum += opt->theta();
-        return sum;
-    });
-
-    total_time+=benchmark("Rho", [&]() {
-        double sum = 0.0;
-        for (const auto& opt : optionsVirtual) sum += opt->rho();
-        return sum;
-    });
-    std::cout<< "Total Calculation Time: "<<total_time<<"\n";
+    std::cout << "\n[Template-Based Implementation]\n";
+    double totalTemplate = benchmarkGreeks<decltype(optionsTemplate), BlackScholesGeneric<EuropeanOption>>(optionsTemplate, "", {});
+    std::cout << "Total Calculation Time: " << totalTemplate << " ms\n";
 }
 
+// separate call & put european template; theoretically faster
 void benchmarkSeparatedCallPut(int numOptions) {
     std::vector<EuropeanCallOption> callOptions;
     std::vector<EuropeanPutOption> putOptions;
 
-    std::random_device rd;
-    std::mt19937 gen(rd());
-    std::uniform_real_distribution<double> spot(90, 110);
-    std::uniform_real_distribution<double> strike(90, 110);
-    std::uniform_real_distribution<double> rate(0.01, 0.05);
-    std::uniform_real_distribution<double> vol(0.05, 0.3);
-    std::uniform_real_distribution<double> expiry(0.1, 2.0);
-    std::bernoulli_distribution typeDist(0.5);
-
-    callOptions.reserve(numOptions / 2);
-    putOptions.reserve(numOptions / 2);
-
+    RandomGenerator rng;
     for (int i = 0; i < numOptions; ++i) {
-        double S = spot(gen);
-        double K = strike(gen);
-        double r = rate(gen);
-        double sigma = vol(gen);
-        double T = expiry(gen);
-
-        if (typeDist(gen))
+        auto [S, K, r, sigma, T, type] = rng.generateOptionParams();
+        if (type == Call)
             callOptions.emplace_back(S, K, r, sigma, T);
         else
             putOptions.emplace_back(S, K, r, sigma, T);
     }
 
     std::cout << "\n[Template Separated Call + Put Options]\n";
-
-    double totalTime = 0.0;
-
-    totalTime += benchmark("Price (Call)", [&]() {
-        double sum = 0.0;
-        for (const auto& opt : callOptions) sum += BlackScholes<EuropeanCallOption>::price(opt);
-        return sum;
-    });
-
-    totalTime += benchmark("Price (Put)", [&]() {
-        double sum = 0.0;
-        for (const auto& opt : putOptions) sum += BlackScholes<EuropeanPutOption>::price(opt);
-        return sum;
-    });
-
-    totalTime += benchmark("Delta (Call)", [&]() {
-        double sum = 0.0;
-        for (const auto& opt : callOptions) sum += BlackScholes<EuropeanCallOption>::delta(opt);
-        return sum;
-    });
-
-    totalTime += benchmark("Delta (Put)", [&]() {
-        double sum = 0.0;
-        for (const auto& opt : putOptions) sum += BlackScholes<EuropeanPutOption>::delta(opt);
-        return sum;
-    });
-
-    totalTime += benchmark("Gamma (Call)", [&]() {
-        double sum = 0.0;
-        for (const auto& opt : callOptions) sum += BlackScholes<EuropeanCallOption>::gamma(opt);
-        return sum;
-    });
-
-    totalTime += benchmark("Gamma (Put)", [&]() {
-        double sum = 0.0;
-        for (const auto& opt : putOptions) sum += BlackScholes<EuropeanPutOption>::gamma(opt);
-        return sum;
-    });
-
-    totalTime += benchmark("Vega (Call)", [&]() {
-        double sum = 0.0;
-        for (const auto& opt : callOptions) sum += BlackScholes<EuropeanCallOption>::vega(opt);
-        return sum;
-    });
-
-    totalTime += benchmark("Vega (Put)", [&]() {
-        double sum = 0.0;
-        for (const auto& opt : putOptions) sum += BlackScholes<EuropeanPutOption>::vega(opt);
-        return sum;
-    });
-
-    totalTime += benchmark("Theta (Call)", [&]() {
-        double sum = 0.0;
-        for (const auto& opt : callOptions) sum += BlackScholes<EuropeanCallOption>::theta(opt);
-        return sum;
-    });
-
-    totalTime += benchmark("Theta (Put)", [&]() {
-        double sum = 0.0;
-        for (const auto& opt : putOptions) sum += BlackScholes<EuropeanPutOption>::theta(opt);
-        return sum;
-    });
-
-    totalTime += benchmark("Rho (Call)", [&]() {
-        double sum = 0.0;
-        for (const auto& opt : callOptions) sum += BlackScholes<EuropeanCallOption>::rho(opt);
-        return sum;
-    });
-
-    totalTime += benchmark("Rho (Put)", [&]() {
-        double sum = 0.0;
-        for (const auto& opt : putOptions) sum += BlackScholes<EuropeanPutOption>::rho(opt);
-        return sum;
-    });
-
-    std::cout << "\n[Total Time for Separated Call + Put]: " << totalTime << " ms\n";
+    double total = 0.0;
+    total += benchmarkGreeks<decltype(callOptions), BlackScholes<EuropeanCallOption>>(callOptions, "Call ", {});
+    total += benchmarkGreeks<decltype(putOptions), BlackScholes<EuropeanPutOption>>(putOptions, "Put  ", {});
+    std::cout << "Total Time for Separated Call + Put: " << total << " ms\n";
 }
 
-void benchmarkAmericanOptions(int numOptions, int steps = 1000){
+// american options
+void benchmarkAmericanOptions(int numOptions, int steps = 1000) {
+    std::vector<AmericanCallOption> callOptions;
     std::vector<AmericanPutOption> putOptions;
-    putOptions.reserve(numOptions);
 
-    std::random_device rd;
-    std::mt19937 gen(rd());
-    std::uniform_real_distribution<double> spot(90, 110);
-    std::uniform_real_distribution<double> strike(90, 110);
-    std::uniform_real_distribution<double> rate(0.01, 0.05);
-    std::uniform_real_distribution<double> vol(0.05, 0.3);
-    std::uniform_real_distribution<double> expiry(0.1, 2.0);
-
+    RandomGenerator rng;
     for (int i = 0; i < numOptions; ++i) {
-        putOptions.emplace_back(
-                spot(gen),
-                strike(gen),
-                rate(gen),
-                vol(gen),
-                expiry(gen)
-        );
+        auto [S, K, r, sigma, T, type] = rng.generateOptionParams();
+        if (type == Call)
+            callOptions.emplace_back(S, K, r, sigma, T);
+        else
+            putOptions.emplace_back(S, K, r, sigma, T);
     }
 
-    std::cout << "\n[American Put Options - Binomial Tree Implementation]\n";
+    std::cout << "\n[American Options - Binomial Tree Implementation]\n";
 
-    double totalTime = benchmark("Price (American Put)", [&]() {
-        double sum = 0.0;
-        for (const auto& opt : putOptions)
-            sum += BinomialTree<AmericanPutOption>::price(opt, steps);
-        return sum;
+    double totalTime = 0.0;
+    totalTime += benchmark("Price (American Call)", [&]() {
+        return applyAndSum(callOptions, [&](const AmericanCallOption& opt) {
+            return BinomialTree<AmericanCallOption>::price(opt, steps);
+        });
     });
 
-    std::cout << "[Total Time for American Options]: " << totalTime << " ms\n";
-}
+    totalTime += benchmark("Price (American Put)", [&]() {
+        return applyAndSum(putOptions, [&](const AmericanPutOption& opt) {
+            return BinomialTree<AmericanPutOption>::price(opt, steps);
+        });
+    });
 
+    std::cout << "Total Time for American Options: " << totalTime << " ms\n";
+}
 
 int main() {
     constexpr int NUM_OPTIONS = 1'000'000;
     benchmarkBothImplementations(NUM_OPTIONS);
     benchmarkSeparatedCallPut(NUM_OPTIONS);
-    benchmarkAmericanOptions(10000);
+    benchmarkAmericanOptions(10'000); // Reduced for binomial tree speed
     return 0;
 }
