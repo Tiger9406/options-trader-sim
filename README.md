@@ -10,7 +10,6 @@ and will later include a frontend user interface(React) and portfolio/trading ma
 
 - backend/: C++ pricing engine & (planned) simulation logic 
 - frontend/: (planned) UI for user interaction and effective visualization
-- tests/: general tests such as backend performance tests; could be restructured
 - data/: (planned) sample historical data for testing
 
 ## Status
