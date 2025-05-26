@@ -15,6 +15,7 @@ target_include_directories(options_simulator PRIVATE
         src
         src/shared
         src/european
+        src/american
         src/option
         src/pricing
 )
@@ -30,6 +31,7 @@ target_include_directories(performance_test PRIVATE
         src
         src/shared
         src/european
+        src/american
         src/option
         src/pricing
 )
