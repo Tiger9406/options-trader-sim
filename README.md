@@ -3,33 +3,36 @@
 This is a fullstack project for simulating options trading. I hope to learn the basics of 
 principals behind options as well as focus on system design.
 The project consists of a C++ backend that implements option pricing models (currently European 
-options using the Black-Scholes formula), and will later include a frontend user interface
-(React) and portfolio/trading management features.
+options using the Black-Scholes formula and American option using the Binomial Tree Model), 
+and will later include a frontend user interface(React) and portfolio/trading management features.
 
 ## Structure
 
 - backend/: C++ pricing engine & (planned) simulation logic 
 - frontend/: (planned) UI for user interaction and effective visualization
+- tests/: general tests such as backend performance tests; could be restructured
 - data/: (planned) sample historical data for testing
 
 ## Status
 
-### Completed:
-- C++ pricing engine complete for European call/put
-- European Options Greeks
-- Adapting into template style for European
+### Completed (Reverse Chronological Order):
+- American Option pricing via Binomial Tree
+- Separating Call & Put template for European
 - Benchmarking
-- Separating Call & Put for European
-
+- Adapting into template style for European
+- European Options Greeks
+- C++ pricing engine complete for European call/put
 
 ### In Progress:
-- American options: binomial trees or numerical PDE methods
+- American options speedup compared to binomial tree
 
 ### Planned:
+- Parallel calculations; CPU and maybe GPU
 - Portfolio simulation: track cash balance, option positions, etc. Methods like buy, sell 
 - Market Simulation: Simulate realistic market conditions: volatility, price movements
 - Strategies/Backtesting
 - React frontend
+
 
 ## Build & Run (C++ backend)
 

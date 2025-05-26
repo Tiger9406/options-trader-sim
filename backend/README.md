@@ -15,6 +15,7 @@ I hope to learn the mathematical reasoning behind options pricing, focusing on s
   - (Fastest) Separate Call & Put Options
 - Console interface
 - Template style instead of inheritance
+- American call and put pricing via Binomial Tree
 
 ## Previous Progression:
 - European call & put as a class
@@ -39,9 +40,12 @@ backend/
             Option.h
         pricing/
             BlackScholes.h
+            BinomialTree.h
         shared/
             OptionType.h
             MathUtil.h
+    tests/
+        performance_test.cpp
 ```
 
 ## Functionality
@@ -72,3 +76,8 @@ Having undergone several implementations of this, concluded that separate types 
 is fastest and most logical in large scale.
 
 ### American
+This simulator generates prices for American options using a Binomial Tree model, which unlike European
+options, can be exercised at any time before the expiration time.
+
+The Binomial Tree Model uses a iterative vector method instead of pure recursion for faster performance
+and efficiency in memory use.
