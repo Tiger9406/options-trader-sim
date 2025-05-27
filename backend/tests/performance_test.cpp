@@ -10,6 +10,7 @@
 #include "AmericanOption.h"
 #include "BinomialTree.h"
 #include "PricingDispatcher.h"
+#include "TemplatePricing.h"
 
 // Timing utility
 template<typename Func>
@@ -30,7 +31,7 @@ double applyAndSum(const Container& container, Func func) {
     return sum;
 }
 
-// using applyAndSum do all prices and greeks; only for europeans as of now, american greeks not implemented
+// using applyAndSum do all prices and greeks; only for europeans as of now, templateAndInheritance greeks not implemented
 template<typename Container, typename Engine>
 double benchmarkGreeks(const Container& options, const std::string& prefix, Engine) {
     double total = 0.0;
@@ -124,7 +125,7 @@ void benchmarkSeparatedBlackScholes(int numOptions) {
 
 
 
-// american options
+// templateAndInheritance options
 void benchmarkSeparatedBinomialTree(int numOptions, int steps = 1000) {
     std::vector<AmericanCallOption> callOptions;
     std::vector<AmericanPutOption> putOptions;
@@ -156,7 +157,7 @@ void benchmarkSeparatedBinomialTree(int numOptions, int steps = 1000) {
     std::cout << "Total Time for Separate Binomial Tree: " << totalTime << " ms\n";
 }
 
-// american options
+// templateAndInheritance options
 void benchmarkGenericBinomialTreeTemplate(int numOptions, int steps = 1000) {
     std::vector<AmericanOption> americanOptions;
 
@@ -176,7 +177,7 @@ void benchmarkGenericBinomialTreeTemplate(int numOptions, int steps = 1000) {
     });
 }
 
-void benchmarkDispatcher(int numEuropean, int numAmerican) {
+void benchmarkDispatcherSeparateStyle(int numEuropean, int numAmerican) {
     std::vector<Option> europeanOptions;
     std::vector<Option> americanOptions;
 
@@ -208,16 +209,59 @@ void benchmarkDispatcher(int numEuropean, int numAmerican) {
     std::cout << "Total Time for Dispatcher-Based Binomial Pricing: " << totalTime << " ms\n";
 }
 
+void benchmarkDispatcherMixedStyle(int numEuropean, int numAmerican) {
+    std::vector<Option> allOptions;
+    RandomGenerator rng;
+
+    int totalOptions = numEuropean + numAmerican;
+    std::vector<OptionStyle> styles;
+
+    // Fill in the required number of each style
+    styles.insert(styles.end(), numEuropean, OptionStyle::European);
+    styles.insert(styles.end(), numAmerican, OptionStyle::American);
+
+    // Shuffle the styles to mix the order
+    std::shuffle(styles.begin(), styles.end(), std::mt19937{std::random_device{}()});
+
+    // Generate options based on shuffled styles
+    for (int i = 0; i < totalOptions; ++i) {
+        auto [S, K, r, sigma, T, type] = rng.generateOptionParams();
+        allOptions.emplace_back(S, K, r, sigma, T, type, styles[i]);
+    }
+
+    std::cout << "\n[Unified Dispatcher-Based Benchmarking with Mixed Options]\n";
+
+    double totalTime = 0.0;
+
+    totalTime += benchmark("Price (All via Dispatcher)", [&]() {
+        return applyAndSum(allOptions, PricingDispatcher::price);
+    });
+
+    std::cout << "Total Time for Dispatcher-Based Binomial Pricing: " << totalTime << " ms\n";
+}
+
+
 int main() {
     constexpr int NUM_EUROPEAN_OPTIONS = 1'000'000;
+    //=============
+    //Benchmarks for Inheritance, Template, Separated Template
+    //=============
 //    benchmarkVirtualBlackScholes(NUM_EUROPEAN_OPTIONS);
 //    benchmarkGenericBlackScholesTemplate(NUM_EUROPEAN_OPTIONS);
 //    benchmarkSeparatedBlackScholes(NUM_EUROPEAN_OPTIONS);
 
     constexpr int NUM_AMERICAN_OPTIONS = 10'000;
+    //=============
+    //Benchmarks for Template Binomial Tree
+    //=============
 //    benchmarkSeparatedBinomialTree(NUM_AMERICAN_OPTIONS); // Reduced for binomial tree speed
 //    benchmarkGenericBinomialTreeTemplate(NUM_AMERICAN_OPTIONS);
 
-    benchmarkDispatcher(NUM_EUROPEAN_OPTIONS, NUM_AMERICAN_OPTIONS);
+    //=============
+    //Benchmarks for dispatcher & observing time difference
+    //in having separated European & American vs all together
+    //=============
+//    benchmarkDispatcherSeparateStyle(NUM_EUROPEAN_OPTIONS, NUM_AMERICAN_OPTIONS);
+    benchmarkDispatcherMixedStyle(NUM_EUROPEAN_OPTIONS, NUM_AMERICAN_OPTIONS);
     return 0;
 }

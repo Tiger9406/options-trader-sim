@@ -22,6 +22,14 @@ public:
                 throw std::invalid_argument("Unknown option style");
         }
     }
+    static std::vector<double> priceBatch(const std::vector<Option>& opts) {
+        std::vector<double> prices(opts.size());
+
+        #pragma omp parallel for
+        for (int i = 0; i < opts.size(); ++i)
+            prices[i] = price(opts[i]);
+        return prices;
+    }
 };
 
 #endif //OPTIONS_SIMULATOR_PRICINGDISPATCHER_H
