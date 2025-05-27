@@ -6,9 +6,10 @@
 #include <functional>
 #include "EuropeanOption.h"
 #include "BlackScholes.h"
-#include "OptionType.h"
+#include "OptionEnums.h"
 #include "AmericanOption.h"
 #include "BinomialTree.h"
+#include "PricingDispatcher.h"
 
 // Timing utility
 template<typename Func>
@@ -65,14 +66,12 @@ struct RandomGenerator {
     }
 };
 // template generic vs virtual
-void benchmarkBothImplementations(int numOptions) {
-    std::vector<EuropeanOption> optionsTemplate;
-    std::vector<std::unique_ptr<Option>> optionsVirtual;
+void benchmarkVirtualBlackScholes(int numOptions) {
+    std::vector<std::unique_ptr<OptionClass>> optionsVirtual;
 
     RandomGenerator rng;
     for (int i = 0; i < numOptions; ++i) {
         auto [S, K, r, sigma, T, type] = rng.generateOptionParams();
-        optionsTemplate.emplace_back(S, K, r, sigma, T, type);
         optionsVirtual.emplace_back(std::make_unique<EuropeanOptionInheritance>(S, K, r, sigma, T, type));
     }
 
@@ -85,14 +84,25 @@ void benchmarkBothImplementations(int numOptions) {
     totalVirtual += benchmark("Theta", [&]() { return applyAndSum(optionsVirtual, [](const auto& o) { return o->theta(); }); });
     totalVirtual += benchmark("Rho",   [&]() { return applyAndSum(optionsVirtual, [](const auto& o) { return o->rho(); }); });
     std::cout << "Total Calculation Time: " << totalVirtual << " ms\n";
+}
+
+// template generic black scholes
+void benchmarkGenericBlackScholesTemplate(int numOptions) {
+    std::vector<EuropeanOption> optionsTemplate;
+
+    RandomGenerator rng;
+    for (int i = 0; i < numOptions; ++i) {
+        auto [S, K, r, sigma, T, type] = rng.generateOptionParams();
+        optionsTemplate.emplace_back(S, K, r, sigma, T, type);
+    }
 
     std::cout << "\n[Template-Based Implementation]\n";
-    double totalTemplate = benchmarkGreeks<decltype(optionsTemplate), BlackScholesGeneric<EuropeanOption>>(optionsTemplate, "", {});
+    double totalTemplate = benchmarkGreeks<decltype(optionsTemplate), BlackScholesTemplate<EuropeanOption>>(optionsTemplate, "", {});
     std::cout << "Total Calculation Time: " << totalTemplate << " ms\n";
 }
 
 // separate call & put european template; theoretically faster
-void benchmarkSeparatedCallPut(int numOptions) {
+void benchmarkSeparatedBlackScholes(int numOptions) {
     std::vector<EuropeanCallOption> callOptions;
     std::vector<EuropeanPutOption> putOptions;
 
@@ -107,13 +117,15 @@ void benchmarkSeparatedCallPut(int numOptions) {
 
     std::cout << "\n[Template Separated Call + Put Options]\n";
     double total = 0.0;
-    total += benchmarkGreeks<decltype(callOptions), BlackScholes<EuropeanCallOption>>(callOptions, "Call ", {});
-    total += benchmarkGreeks<decltype(putOptions), BlackScholes<EuropeanPutOption>>(putOptions, "Put  ", {});
+    total += benchmarkGreeks<decltype(callOptions), BlackScholesSeparated<EuropeanCallOption>>(callOptions, "Call ", {});
+    total += benchmarkGreeks<decltype(putOptions), BlackScholesSeparated<EuropeanPutOption>>(putOptions, "Put  ", {});
     std::cout << "Total Time for Separated Call + Put: " << total << " ms\n";
 }
 
+
+
 // american options
-void benchmarkAmericanOptions(int numOptions, int steps = 1000) {
+void benchmarkSeparatedBinomialTree(int numOptions, int steps = 1000) {
     std::vector<AmericanCallOption> callOptions;
     std::vector<AmericanPutOption> putOptions;
 
@@ -126,28 +138,86 @@ void benchmarkAmericanOptions(int numOptions, int steps = 1000) {
             putOptions.emplace_back(S, K, r, sigma, T);
     }
 
-    std::cout << "\n[American Options - Binomial Tree Implementation]\n";
+    std::cout << "\n[American Options - Separated Binomial Tree Implementation]\n";
 
     double totalTime = 0.0;
     totalTime += benchmark("Price (American Call)", [&]() {
         return applyAndSum(callOptions, [&](const AmericanCallOption& opt) {
-            return BinomialTree<AmericanCallOption>::price(opt, steps);
+            return BinomialTreeSeparated<AmericanCallOption>::price(opt, steps);
         });
     });
 
     totalTime += benchmark("Price (American Put)", [&]() {
         return applyAndSum(putOptions, [&](const AmericanPutOption& opt) {
-            return BinomialTree<AmericanPutOption>::price(opt, steps);
+            return BinomialTreeSeparated<AmericanPutOption>::price(opt, steps);
         });
     });
 
-    std::cout << "Total Time for American Options: " << totalTime << " ms\n";
+    std::cout << "Total Time for Separate Binomial Tree: " << totalTime << " ms\n";
+}
+
+// american options
+void benchmarkGenericBinomialTreeTemplate(int numOptions, int steps = 1000) {
+    std::vector<AmericanOption> americanOptions;
+
+    RandomGenerator rng;
+    for (int i = 0; i < numOptions; ++i) {
+        auto [S, K, r, sigma, T, type] = rng.generateOptionParams();
+        americanOptions.emplace_back(S, K, r, sigma, T, type);
+    }
+
+    std::cout << "\n[American Options - Generic Binomial Tree Implementation]\n";
+
+    double totalTime = 0.0;
+    totalTime += benchmark("Price (Generic Binomial Tree)", [&]() {
+        return applyAndSum(americanOptions, [&](const AmericanOption& opt) {
+            return BinomialTreeTemplate<AmericanOption>::price(opt, steps);
+        });
+    });
+}
+
+void benchmarkDispatcher(int numEuropean, int numAmerican) {
+    std::vector<Option> europeanOptions;
+    std::vector<Option> americanOptions;
+
+    RandomGenerator rng;
+    for (int i = 0; i < numEuropean; ++i) {
+        auto [S, K, r, sigma, T, type] = rng.generateOptionParams();
+        europeanOptions.emplace_back(S, K, r, sigma, T, type, OptionStyle::European);
+    }
+    for (int i = 0; i < numAmerican; ++i) {
+        auto [S, K, r, sigma, T, type] = rng.generateOptionParams();
+        americanOptions.emplace_back(S, K, r, sigma, T, type, OptionStyle::American);
+    }
+
+    std::cout << "\n[Unified Dispatcher-Based Benchmarking]\n";
+
+    double totalTime = 0.0;
+
+    totalTime += benchmark("Price (European via Dispatcher)", [&]() {
+        return applyAndSum(europeanOptions, PricingDispatcher::price);
+    });
+
+    std::cout << "Total Time for Dispatcher-Based Black Scholes Pricing: " << totalTime << " ms\n";
+
+    totalTime=0.0;
+    totalTime += benchmark("Price (American via Dispatcher)", [&]() {
+        return applyAndSum(americanOptions, PricingDispatcher::price);
+    });
+
+    std::cout << "Total Time for Dispatcher-Based Binomial Pricing: " << totalTime << " ms\n";
 }
 
 int main() {
-    constexpr int NUM_OPTIONS = 1'000'000;
-    benchmarkBothImplementations(NUM_OPTIONS);
-    benchmarkSeparatedCallPut(NUM_OPTIONS);
-    benchmarkAmericanOptions(10'000); // Reduced for binomial tree speed
+    constexpr int NUM_EUROPEAN_OPTIONS = 1'000'000;
+//    benchmarkVirtualBlackScholes(NUM_EUROPEAN_OPTIONS);
+//    benchmarkGenericBlackScholesTemplate(NUM_EUROPEAN_OPTIONS);
+//    benchmarkSeparatedBlackScholes(NUM_EUROPEAN_OPTIONS);
+
+    constexpr int NUM_AMERICAN_OPTIONS = 10'000;
+//    benchmarkSeparatedBinomialTree(NUM_AMERICAN_OPTIONS); // Reduced for binomial tree speed
+//    benchmarkGenericBinomialTreeTemplate(NUM_AMERICAN_OPTIONS);
+
+    benchmarkDispatcher(NUM_EUROPEAN_OPTIONS, NUM_AMERICAN_OPTIONS);
     return 0;
 }

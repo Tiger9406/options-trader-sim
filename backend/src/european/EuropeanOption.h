@@ -5,10 +5,17 @@
 #ifndef OPTIONS_SIMULATOR_EUROPEANOPTION_H
 #define OPTIONS_SIMULATOR_EUROPEANOPTION_H
 
-#include "../option/Option.h"
-#include "../shared/OptionType.h"
+#include "../shared/Option.h"
+#include "../shared/OptionEnums.h"
 
-class EuropeanOptionInheritance: public Option {
+//opt to use this for simplicity
+struct EuropeanOption{
+    double S, K, T, r, sigma;
+    OptionType type;
+    EuropeanOption(double S_, double K_, double r_, double sigma_, double T_, OptionType type_) : S(S_), K(K_), T(T_), r(r_), sigma(sigma_), type(type_){}
+};
+
+class EuropeanOptionInheritance: public OptionClass {
 public:
     EuropeanOptionInheritance(double S_, double K_, double r_, double sigma_, double T_, OptionType type_);
     double price() const override;
@@ -19,11 +26,6 @@ public:
     double rho() const override;
 };
 
-struct EuropeanOption{
-    double S, K, T, r, sigma;
-    OptionType type;
-    EuropeanOption(double S_, double K_, double r_, double sigma_, double T_, OptionType type_) : S(S_), K(K_), T(T_), r(r_), sigma(sigma_), type(type_){}
-};
 struct EuropeanCallOption {
     double S, K, T, r, sigma;
     static constexpr OptionType type = OptionType::Call;

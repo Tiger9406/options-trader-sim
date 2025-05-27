@@ -2,7 +2,7 @@
 #include <memory>
 #include <chrono>
 #include "EuropeanOption.h"
-#include "OptionType.h"
+#include "OptionEnums.h"
 #include "BlackScholes.h"
 #include "BinomialTree.h"
 #include "AmericanOption.h"
@@ -20,7 +20,7 @@ int main() {
     auto end = std::chrono::high_resolution_clock::now();
 
     // ===== INHERITANCE TEST =====
-    std::unique_ptr<Option> callOption = std::make_unique<EuropeanOptionInheritance>(S, K, r, sigma, T, Call);
+    std::unique_ptr<OptionClass> callOption = std::make_unique<EuropeanOptionInheritance>(S, K, r, sigma, T, Call);
 
     start = std::chrono::high_resolution_clock::now();
     val = callOption->price();
@@ -31,7 +31,7 @@ int main() {
     EuropeanOption callOption_Template(S, K, r, sigma, T, Call);
 
     start = std::chrono::high_resolution_clock::now();
-    val = BlackScholesGeneric<EuropeanOption>::price(callOption_Template);
+    val = BlackScholes<EuropeanOption>::price(callOption_Template);
     end = std::chrono::high_resolution_clock::now();
     std::chrono::duration<double, std::nano> duration_template = end - start;
 
@@ -39,7 +39,7 @@ int main() {
     EuropeanCallOption callOption_Separate(S, K, r, sigma, T);
 
     start = std::chrono::high_resolution_clock::now();
-    val = BlackScholes<EuropeanCallOption>::price(callOption_Separate);
+    val = BlackScholesSeparated<EuropeanCallOption>::price(callOption_Separate);
     end = std::chrono::high_resolution_clock::now();
     std::chrono::duration<double, std::nano> duration_template_separate = end - start;
 

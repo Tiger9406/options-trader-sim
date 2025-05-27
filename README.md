@@ -24,7 +24,7 @@ and will later include a frontend user interface(React) and portfolio/trading ma
 - C++ pricing engine complete for European call/put
 
 ### In Progress:
-- American options speedup compared to binomial tree
+- American options speedup: BAW and Ju-Zhong Models
 
 ### Planned:
 - Parallel calculations; CPU and maybe GPU

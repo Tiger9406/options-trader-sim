@@ -8,7 +8,7 @@
 using namespace std;
 
 EuropeanOptionInheritance::EuropeanOptionInheritance(double S_, double K_, double r_, double sigma_, double T_, OptionType type_)
-        : Option(S_, K_, r_, sigma_, T_, type_) {}
+        : OptionClass(S_, K_, r_, sigma_, T_, type_) {}
 
 double EuropeanOptionInheritance::price() const {
     //assumes Brownian motion: develops randomly w/ constant volatility & constant drift rate/expected return

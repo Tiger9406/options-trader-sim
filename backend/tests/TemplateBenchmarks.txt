@@ -1,0 +1,40 @@
+[Virtual (Inheritance) Implementation]
+Price took 202.779 ms
+Delta took 141.422 ms
+Gamma took 156.459 ms
+Vega took 165.197 ms
+Theta took 241.101 ms
+Rho took 165.458 ms
+Total Calculation Time: 1072.42 ms
+
+[Template-Based Implementation]
+Price took 166.686 ms
+Delta took 104.583 ms
+Gamma took 129.816 ms
+Vega took 130.374 ms
+Theta took 195.045 ms
+Rho took 130.232 ms
+Total Calculation Time: 856.736 ms
+
+[Template Separated Call + Put Options]
+Call Price took 81.2569 ms
+Call Delta took 51.2034 ms
+Call Gamma took 64.8819 ms
+Call Vega took 64.7909 ms
+Call Theta took 96.3746 ms
+Call Rho took 60.3381 ms
+Put  Price took 85.7915 ms
+Put  Delta took 51.8968 ms
+Put  Gamma took 65.1385 ms
+Put  Vega took 64.9745 ms
+Put  Theta took 96.9154 ms
+Put  Rho took 60.9848 ms
+Total Time for Separated Call + Put: 844.547 ms
+
+[American Options - Separated Binomial Tree Implementation]
+Price (American Call) took 30826.6 ms
+Price (American Put) took 30265.6 ms
+Total Time for Separate Binomial Tree: 61092.2 ms
+
+[American Options - Generic Binomial Tree Implementation]
+Price (Generic Binomial Tree) took 60866.3 ms
