@@ -8,6 +8,7 @@
 #include <vector>
 #include "../shared/MathUtils.h"
 #include "../shared/OptionEnums.h"
+#include "BinomialWorkspace.h"
 
 class BinomialTree {
 public:
@@ -58,6 +59,41 @@ public:
 
         return option_values[0];
     }
+    static double price(const Option& opt, int steps, BinomialWorkspace& workspace) {
+        workspace.resize(steps);  // Ensure buffer is big enough
+        auto& prices = workspace.prices;
+        auto& option_values = workspace.optionValues;
+
+        double dt = opt.T / steps;
+        double u = std::exp(opt.sigma * std::sqrt(dt));
+        double d = 1.0 / u;
+        double q = (std::exp(opt.r * dt) - d) / (u - d);
+        double discount = std::exp(-opt.r * dt);
+
+        for (int i = 0; i <= steps; i++) {
+            prices[i] = opt.S * std::pow(u, steps - i) * std::pow(d, i);
+            if (opt.type == OptionType::Call)
+                option_values[i] = std::max(prices[i] - opt.K, 0.0); //terminal option vals
+            else
+                option_values[i] = std::max(opt.K - prices[i], 0.0);
+        }
+
+        for (int step = steps - 1; step >= 0; step--) {
+            for (int i = 0; i <= step; i++) {
+                prices[i] /= u;
+                double continuation = discount * (q * option_values[i] + (1 - q) * option_values[i + 1]);
+                double exercise;
+                if (opt.type == OptionType::Call)
+                    exercise = std::max(prices[i] - opt.K, 0.0);
+                else
+                    exercise = std::max(opt.K - prices[i], 0.0);
+                option_values[i] = std::max(continuation, exercise);
+            }
+        }
+
+        return option_values[0];
+    }
+
 };
 
 

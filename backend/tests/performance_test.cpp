@@ -12,7 +12,6 @@
 #include "PricingDispatcher.h"
 #include "TemplatePricing.h"
 #include "OptionBatch.h"
-#include "BatchPricing.h"
 
 // Timing utility
 template<typename Func>
@@ -281,7 +280,7 @@ void benchmarkBlackScholesSIMD(int numEuropean){
     }
     auto batch = toEuropeanBatch(europeanOptions);
     auto start = std::chrono::high_resolution_clock::now();
-    auto prices = blackScholesBatch(batch);
+    auto prices = PricingDispatcher::priceBatchSIMD(batch);
     auto end = std::chrono::high_resolution_clock::now();
 
     std::cout << "Batch Black-Scholes pricing took: "
@@ -315,7 +314,7 @@ int main() {
     //=============
     //Batch processing: allow parallelization; significantly faster
     //=============
-//    benchmarkParallelization(NUM_EUROPEAN_OPTIONS, NUM_AMERICAN_OPTIONS);
-//    benchmarkBlackScholesSIMD(NUM_EUROPEAN_OPTIONS);
+    benchmarkParallelization(NUM_EUROPEAN_OPTIONS, NUM_AMERICAN_OPTIONS);
+    benchmarkBlackScholesSIMD(NUM_EUROPEAN_OPTIONS);
     return 0;
 }

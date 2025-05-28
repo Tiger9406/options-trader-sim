@@ -20,6 +20,7 @@ and will later include a frontend UI (React) and full portfolio/trading manageme
 ## Status
 
 ### Completed (Reverse Chronological Order):
+- Memory reuse for Binomial Tree (thread-local workspace)
 - SIMD + OpenMP batch pricing (1M options in <20ms)
 - Unified dispatcher for European & American pricing
 - American Option pricing via Binomial Tree
@@ -29,7 +30,7 @@ and will later include a frontend UI (React) and full portfolio/trading manageme
 - C++ pricing engine complete for European call/put
 
 ### In Progress:
-- Preallocating memory buffers for Binomial model
+- American Greeks
 - American options speedup: BAW and Ju-Zhong Models
 
 ### Planned:

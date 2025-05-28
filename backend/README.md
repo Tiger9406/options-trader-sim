@@ -81,12 +81,10 @@ The model calculates fair value based on:
 
 #### Performance Optimizations
 - **SIMD Vectorization**: Batched pricing via converting to and using Structure of Arrays (SoA), enabling computation of vectorized prices at once
-- **Multithreading (OpenMP)**: Parallelized across CPU cores for greater throughput.
-- **Batch API**: `blackScholesBatch()` computes 1M+ prices in <20ms on modern CPUs.
-- **Dispatch Model**: Runtime dispatcher falls back to scalar methods for mixed-style batches.
-
-Having undergone several implementations of this, concluded that separate types (Calls, Puts) Templates
-is fastest and most logical in large scale.
+- **Multithreading (OpenMP)**: Parallelized across CPU cores for greater throughput
+- **Batch API**: `blackScholesBatch()` computes 1M+ prices in <20ms on modern CPUs
+- **Dispatch Model**: Runtime dispatcher falls back to scalar methods for mixed-style batches
+- **Memory Reuse for American Options**: Binomial Tree model uses thread-local `BinomialWorkspace` to eliminate repeated vector allocations
 
 ### American
 This simulator generates prices for American options using a Binomial Tree model, which unlike European
@@ -94,7 +92,7 @@ options, can be exercised at any time before the expiration time.
 
 #### Model Features
 - **Iterative Tree Construction**: Utilizes vector-based (not recursive) for speed and stability
-
+- **Preallocated Buffers**: Reuses memory, reducing heap allocations in batch runs
 ### Benchmarked Performance
 - **European Options (1M calls)**: ~18–20ms
 - **American Options (10k options)**: ~400ms with OpenMP & Parallelization
