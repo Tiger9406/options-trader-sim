@@ -7,50 +7,58 @@ I hope to learn the mathematical reasoning behind options pricing, focusing on s
 
 ---
 
-## Current Features
-
-- European call and put pricing via Black-Scholes
-  - OOP style options
-  - Generic European Option Template
-  - (Fastest) Separate Call & Put Options
-- Console interface
-- Template style instead of inheritance
-- American call and put pricing via Binomial Tree
+## Features
+- Current:
+  - Price dispatcher: given option, return price
+    - European call and put pricing via Black-Scholes
+    - American call and put pricing via Binomial Tree
+  - Comprehensive performance test to evaluate computation speed on millions of options
+- Out of Date (still in codebase):
+  - OOP Inheritance style; override functions (slow)
+  - Generic European Option Template (saves time but rigid)
+  - Separate Call & Put Options (saves time but rigid)
 
 ## Previous Progression:
 - European call & put as a class
 - Insertion of inheritance anticipating types of options
 - Moving to templates for faster resolving behavior at compile time, inline execution, no heap allocation, & no vtable lookup
 - Separate call and put options for reduced branching for template
+  - Observe minimal increase speed
+- Opt for class-based option with composition of type & style
 
 ## Project Structure
 
 ```
 backend/
+    benchmarks/
+       BENCHMARKS.md
+       legacy_benchmarks.txt 
+    src/
+        pricing/
+            BatchPricing.h
+            BinomialTree.h
+            BlackScholes.h
+            OptionBatch.h
+            PricingDispatcher.h
+            TemplatePricing.h
+        shared/
+            Option.h
+            MathUtil.h
+            OptionEnums.h
+        legacy/
+            EuropeanOption.cpp
+            EuropeanOption.h
+            AmericanOption.h
+    tests/
+        performance_test.cpp
     CMakeLists.txt
     main.cpp
     README.md
-    src/
-        european/
-            EuropeanOption.cpp
-            EuropeanOption.h
-        american/
-            AmericanOption.h
-        option/
-            Option.h
-        pricing/
-            BlackScholes.h
-            BinomialTree.h
-        shared/
-            OptionType.h
-            MathUtil.h
-    tests/
-        performance_test.cpp
 ```
 
 ## Functionality
 
-### European
+### European Options (Black-Scholes Model)
 This simulator generates a price for European options using the Black-Scholes Model:
 ```
 Call = S * N(d1) - K * e^(-rT) * N(d2)
@@ -64,13 +72,18 @@ The model calculates fair value based on:
 - Time to expiration (T)
 - Risk-free rate (r)
 - Volatility (σ)
+#### Greeks Calculated
+- **Delta**: sensitivity of option price w/ respect to underlying/spot price
+- **Gamma**: sensitivity of Delta w/ respect to underlying price; second derivative
+- **Vega**: Sensitivity of option price to sigma/volatility
+- **Theta**: Sensitivity of option price to passage of time: T decrease
+- **Rho**: Sensitivity of option price to risk-free interest rate
 
-It calculates the "greeks," metrics used in options pricing using the Black Scholes model:
-- Delta: rate of change of option price w/ respect to underlying/spot price
-- Gamma: rate of change of Delta w/ respect to underlying price; second derivative
-- Vega: Sensitivity of option price to 1% difference in sigma/volatility
-- Theta: Sensitivity of option price w/ respect to passage of time: T decrease
-- Rho: Sensitivity of option price to a 1% change in risk-free interest rate
+#### Performance Optimizations
+- **SIMD Vectorization**: Batched pricing via converting to and using Structure of Arrays (SoA), enabling computation of vectorized prices at once
+- **Multithreading (OpenMP)**: Parallelized across CPU cores for greater throughput.
+- **Batch API**: `blackScholesBatch()` computes 1M+ prices in <20ms on modern CPUs.
+- **Dispatch Model**: Runtime dispatcher falls back to scalar methods for mixed-style batches.
 
 Having undergone several implementations of this, concluded that separate types (Calls, Puts) Templates
 is fastest and most logical in large scale.
@@ -79,5 +92,10 @@ is fastest and most logical in large scale.
 This simulator generates prices for American options using a Binomial Tree model, which unlike European
 options, can be exercised at any time before the expiration time.
 
-The Binomial Tree Model uses a iterative vector method instead of pure recursion for faster performance
-and efficiency in memory use.
+#### Model Features
+- **Iterative Tree Construction**: Utilizes vector-based (not recursive) for speed and stability
+
+### Benchmarked Performance
+- **European Options (1M calls)**: ~18–20ms
+- **American Options (10k options)**: ~400ms with OpenMP & Parallelization
+- **Unified Mixed-Style Dispatcher**: Efficiently handles input with differing styles & types

@@ -1,39 +1,52 @@
 # Options Trader Simulator
 
 This is a fullstack project for simulating options trading. I hope to learn the basics of 
-principals behind options as well as focus on system design.
-The project consists of a C++ backend that implements option pricing models (currently European 
+**principals behind options pricing** as well as apply **efficient system design.**
+
+The project consists of a high-performance C++ pricing engine that implements option pricing models (currently European 
 options using the Black-Scholes formula and American option using the Binomial Tree Model), 
-and will later include a frontend user interface(React) and portfolio/trading management features.
+and will later include a frontend UI (React) and full portfolio/trading management features.
+
+---
 
 ## Structure
 
 - backend/: C++ pricing engine & (planned) simulation logic 
 - frontend/: (planned) UI for user interaction and effective visualization
-- tests/: general tests such as backend performance tests; could be restructured
 - data/: (planned) sample historical data for testing
+
+---
 
 ## Status
 
 ### Completed (Reverse Chronological Order):
+- SIMD + OpenMP batch pricing (1M options in <20ms)
+- Unified dispatcher for European & American pricing
 - American Option pricing via Binomial Tree
-- Separating Call & Put template for European
-- Benchmarking
-- Adapting into template style for European
-- European Options Greeks
+- Performance Benchmarking
+- Template-separated European Call/Put
+- European Options Greeks (delta, gamma, etc.)
 - C++ pricing engine complete for European call/put
 
 ### In Progress:
+- Preallocating memory buffers for Binomial model
 - American options speedup: BAW and Ju-Zhong Models
 
 ### Planned:
-- Parallel calculations; CPU and maybe GPU
+- GPU acceleration (maybe)
 - Portfolio simulation: track cash balance, option positions, etc. Methods like buy, sell 
 - Market Simulation: Simulate realistic market conditions: volatility, price movements
 - Strategies/Backtesting
 - React frontend
 
+---
+## Performance Techniques
+- **SIMD Vectorization**: Batch pricing leverages vectorized CPU instructions to price many options at once
+- **Multithreading (OpenMP)**: Workloads are parallelized across CPU cores to increase throughput
+- **Batch Processing**: Grouping options into SoA format for high-throughput vectorized pricing per CPU
+- **Dispatcher Model**: Dynamically chooses between models based on option style (European vs American)
 
+---
 ## Build & Run (C++ backend)
 
 ```bash

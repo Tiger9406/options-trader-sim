@@ -25,7 +25,8 @@ public:
     static std::vector<double> priceBatch(const std::vector<Option>& opts) {
         std::vector<double> prices(opts.size());
 
-        #pragma omp parallel for
+        //allow parallelization across cpus
+        #pragma omp parallel for default(none) shared(opts, prices)
         for (int i = 0; i < opts.size(); ++i)
             prices[i] = price(opts[i]);
         return prices;

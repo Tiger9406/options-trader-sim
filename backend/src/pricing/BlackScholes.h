@@ -8,6 +8,7 @@
 #include <cmath>
 #include "../shared/MathUtils.h"
 #include "../shared/OptionEnums.h"
+#include "../shared/Option.h"
 
 class BlackScholes{
 public:

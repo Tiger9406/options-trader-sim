@@ -11,6 +11,8 @@
 #include "BinomialTree.h"
 #include "PricingDispatcher.h"
 #include "TemplatePricing.h"
+#include "OptionBatch.h"
+#include "BatchPricing.h"
 
 // Timing utility
 template<typename Func>
@@ -31,7 +33,7 @@ double applyAndSum(const Container& container, Func func) {
     return sum;
 }
 
-// using applyAndSum do all prices and greeks; only for europeans as of now, templateAndInheritance greeks not implemented
+// using applyAndSum do all prices and greeks; only for europeans as of now, legacy greeks not implemented
 template<typename Container, typename Engine>
 double benchmarkGreeks(const Container& options, const std::string& prefix, Engine) {
     double total = 0.0;
@@ -123,9 +125,7 @@ void benchmarkSeparatedBlackScholes(int numOptions) {
     std::cout << "Total Time for Separated Call + Put: " << total << " ms\n";
 }
 
-
-
-// templateAndInheritance options
+// legacy options
 void benchmarkSeparatedBinomialTree(int numOptions, int steps = 1000) {
     std::vector<AmericanCallOption> callOptions;
     std::vector<AmericanPutOption> putOptions;
@@ -157,7 +157,7 @@ void benchmarkSeparatedBinomialTree(int numOptions, int steps = 1000) {
     std::cout << "Total Time for Separate Binomial Tree: " << totalTime << " ms\n";
 }
 
-// templateAndInheritance options
+// legacy options
 void benchmarkGenericBinomialTreeTemplate(int numOptions, int steps = 1000) {
     std::vector<AmericanOption> americanOptions;
 
@@ -177,6 +177,7 @@ void benchmarkGenericBinomialTreeTemplate(int numOptions, int steps = 1000) {
     });
 }
 
+//call Dispatcher::price on all options independently
 void benchmarkDispatcherSeparateStyle(int numEuropean, int numAmerican) {
     std::vector<Option> europeanOptions;
     std::vector<Option> americanOptions;
@@ -208,7 +209,6 @@ void benchmarkDispatcherSeparateStyle(int numEuropean, int numAmerican) {
 
     std::cout << "Total Time for Dispatcher-Based Binomial Pricing: " << totalTime << " ms\n";
 }
-
 void benchmarkDispatcherMixedStyle(int numEuropean, int numAmerican) {
     std::vector<Option> allOptions;
     RandomGenerator rng;
@@ -237,9 +237,57 @@ void benchmarkDispatcherMixedStyle(int numEuropean, int numAmerican) {
         return applyAndSum(allOptions, PricingDispatcher::price);
     });
 
-    std::cout << "Total Time for Dispatcher-Based Binomial Pricing: " << totalTime << " ms\n";
+    std::cout << "Total Time for Dispatcher-Based Mixed Pricing: " << totalTime << " ms\n";
 }
 
+void benchmarkParallelization(int numEuropean, int numAmerican) {
+    std::vector<Option> allOptions;
+    RandomGenerator rng;
+
+    int totalOptions = numEuropean + numAmerican;
+    std::vector<OptionStyle> styles;
+
+    // Fill in the required number of each style
+    styles.insert(styles.end(), numEuropean, OptionStyle::European);
+    styles.insert(styles.end(), numAmerican, OptionStyle::American);
+
+    // Shuffle the styles to mix the order
+    std::shuffle(styles.begin(), styles.end(), std::mt19937{std::random_device{}()});
+
+    // Generate options based on shuffled styles
+    for (int i = 0; i < totalOptions; ++i) {
+        auto [S, K, r, sigma, T, type] = rng.generateOptionParams();
+        allOptions.emplace_back(S, K, r, sigma, T, type, styles[i]);
+    }
+
+    std::cout << "\n[Unified Dispatcher-Based Benchmarking with Mixed Options using Parallelization]\n";
+
+    auto start = std::chrono::high_resolution_clock::now();
+
+    auto prices = PricingDispatcher::priceBatch(allOptions);
+    auto end = std::chrono::high_resolution_clock::now();
+    double totalTime = std::chrono::duration<double, std::milli>(end - start).count();
+
+    std::cout << "Total Time for Dispatcher-Based Pricing: " << totalTime << " ms\n";
+}
+
+void benchmarkBlackScholesSIMD(int numEuropean){
+    std::vector<Option> europeanOptions;
+    RandomGenerator rng;
+    // Generate options based on shuffled styles
+    for (int i = 0; i < numEuropean; i++) {
+        auto [S, K, r, sigma, T, type] = rng.generateOptionParams();
+        europeanOptions.emplace_back(S, K, r, sigma, T, type, OptionStyle::European);
+    }
+    auto batch = toEuropeanBatch(europeanOptions);
+    auto start = std::chrono::high_resolution_clock::now();
+    auto prices = blackScholesBatch(batch);
+    auto end = std::chrono::high_resolution_clock::now();
+
+    std::cout << "Batch Black-Scholes pricing took: "
+              << std::chrono::duration<double, std::milli>(end - start).count()
+              << " ms\n";
+}
 
 int main() {
     constexpr int NUM_EUROPEAN_OPTIONS = 1'000'000;
@@ -262,6 +310,12 @@ int main() {
     //in having separated European & American vs all together
     //=============
 //    benchmarkDispatcherSeparateStyle(NUM_EUROPEAN_OPTIONS, NUM_AMERICAN_OPTIONS);
-    benchmarkDispatcherMixedStyle(NUM_EUROPEAN_OPTIONS, NUM_AMERICAN_OPTIONS);
+//    benchmarkDispatcherMixedStyle(NUM_EUROPEAN_OPTIONS, NUM_AMERICAN_OPTIONS);
+
+    //=============
+    //Batch processing: allow parallelization; significantly faster
+    //=============
+//    benchmarkParallelization(NUM_EUROPEAN_OPTIONS, NUM_AMERICAN_OPTIONS);
+//    benchmarkBlackScholesSIMD(NUM_EUROPEAN_OPTIONS);
     return 0;
 }
