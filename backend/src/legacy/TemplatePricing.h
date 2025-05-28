@@ -2,8 +2,8 @@
 #define OPTIONS_SIMULATOR_TEMPLATEPRICING_H
 
 #include <cmath>
-#include "../shared/MathUtils.h"
-#include "../shared/OptionEnums.h"
+#include "shared/MathUtils.h"
+#include "shared/OptionEnums.h"
 template<typename OptionTypeStruct>
 class BlackScholesTemplate{
 public:
