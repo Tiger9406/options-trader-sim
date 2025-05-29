@@ -4,13 +4,12 @@
 #include <chrono>
 #include <memory>
 #include <functional>
-#include "EuropeanOption.h"
-#include "BlackScholes.h"
-#include "OptionEnums.h"
-#include "AmericanOption.h"
-#include "BinomialTree.h"
+
+#include "legacy/EuropeanOption.h"
+#include "legacy/TemplatePricing.h"
+#include "legacy/AmericanOption.h"
+
 #include "PricingDispatcher.h"
-#include "TemplatePricing.h"
 #include "OptionBatch.h"
 
 // Timing utility
@@ -195,18 +194,15 @@ void benchmarkDispatcherSeparateStyle(int numEuropean, int numAmerican) {
 
     double totalTime = 0.0;
 
-    totalTime += benchmark("Price (European via Dispatcher)", [&]() {
+    totalTime += benchmark("Price (Black Scholes European via Dispatcher)", [&]() {
         return applyAndSum(europeanOptions, PricingDispatcher::price);
     });
 
-    std::cout << "Total Time for Dispatcher-Based Black Scholes Pricing: " << totalTime << " ms\n";
-
     totalTime=0.0;
-    totalTime += benchmark("Price (American via Dispatcher)", [&]() {
+    totalTime += benchmark("Price (Binomial American via Dispatcher)", [&]() {
         return applyAndSum(americanOptions, PricingDispatcher::price);
     });
 
-    std::cout << "Total Time for Dispatcher-Based Binomial Pricing: " << totalTime << " ms\n";
 }
 void benchmarkDispatcherMixedStyle(int numEuropean, int numAmerican) {
     std::vector<Option> allOptions;
@@ -236,7 +232,6 @@ void benchmarkDispatcherMixedStyle(int numEuropean, int numAmerican) {
         return applyAndSum(allOptions, PricingDispatcher::price);
     });
 
-    std::cout << "Total Time for Dispatcher-Based Mixed Pricing: " << totalTime << " ms\n";
 }
 
 void benchmarkParallelization(int numEuropean, int numAmerican) {
@@ -283,37 +278,31 @@ void benchmarkBlackScholesSIMD(int numEuropean){
     auto prices = PricingDispatcher::priceBatchSIMD(batch);
     auto end = std::chrono::high_resolution_clock::now();
 
-    std::cout << "Batch Black-Scholes pricing took: "
+    std::cout << "Batch Black-Scholes include took: "
               << std::chrono::duration<double, std::milli>(end - start).count()
               << " ms\n";
 }
 
 int main() {
     constexpr int NUM_EUROPEAN_OPTIONS = 1'000'000;
-    //=============
-    //Benchmarks for Inheritance, Template, Separated Template
-    //=============
-//    benchmarkVirtualBlackScholes(NUM_EUROPEAN_OPTIONS);
-//    benchmarkGenericBlackScholesTemplate(NUM_EUROPEAN_OPTIONS);
-//    benchmarkSeparatedBlackScholes(NUM_EUROPEAN_OPTIONS);
-
     constexpr int NUM_AMERICAN_OPTIONS = 10'000;
-    //=============
-    //Benchmarks for Template Binomial Tree
-    //=============
-//    benchmarkSeparatedBinomialTree(NUM_AMERICAN_OPTIONS); // Reduced for binomial tree speed
-//    benchmarkGenericBinomialTreeTemplate(NUM_AMERICAN_OPTIONS);
 
-    //=============
-    //Benchmarks for dispatcher & observing time difference
+    //======== Benchmarks for Inheritance, Template, Separated Template ========
+    //benchmarkVirtualBlackScholes(NUM_EUROPEAN_OPTIONS);
+    //benchmarkGenericBlackScholesTemplate(NUM_EUROPEAN_OPTIONS);
+    //benchmarkSeparatedBlackScholes(NUM_EUROPEAN_OPTIONS);
+
+
+    //======== Benchmarks for Template Binomial Tree ========
+    //benchmarkSeparatedBinomialTree(NUM_AMERICAN_OPTIONS); // Reduced for binomial tree speed
+    //benchmarkGenericBinomialTreeTemplate(NUM_AMERICAN_OPTIONS);
+
+    //======== Benchmarks for dispatcher & observing time difference ========
     //in having separated European & American vs all together
-    //=============
-//    benchmarkDispatcherSeparateStyle(NUM_EUROPEAN_OPTIONS, NUM_AMERICAN_OPTIONS);
-//    benchmarkDispatcherMixedStyle(NUM_EUROPEAN_OPTIONS, NUM_AMERICAN_OPTIONS);
+    //benchmarkDispatcherSeparateStyle(NUM_EUROPEAN_OPTIONS, NUM_AMERICAN_OPTIONS);
+    //benchmarkDispatcherMixedStyle(NUM_EUROPEAN_OPTIONS, NUM_AMERICAN_OPTIONS);
 
-    //=============
-    //Batch processing: allow parallelization; significantly faster
-    //=============
+    //======== Batch processing: allow parallelization; significantly faster ========
     benchmarkParallelization(NUM_EUROPEAN_OPTIONS, NUM_AMERICAN_OPTIONS);
     benchmarkBlackScholesSIMD(NUM_EUROPEAN_OPTIONS);
     return 0;

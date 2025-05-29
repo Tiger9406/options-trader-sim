@@ -5,7 +5,7 @@
 #ifndef OPTIONS_SIMULATOR_AMERICANOPTION_H
 #define OPTIONS_SIMULATOR_AMERICANOPTION_H
 
-#include "../shared/OptionEnums.h"
+#include "OptionEnums.h"
 
 struct AmericanOption {
     double S, K, T, r, sigma;

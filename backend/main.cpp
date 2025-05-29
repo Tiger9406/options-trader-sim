@@ -1,11 +1,11 @@
 #include <iostream>
 #include <memory>
 #include <chrono>
-#include "EuropeanOption.h"
+#include "legacy/EuropeanOption.h"
 #include "OptionEnums.h"
 #include "BlackScholes.h"
 #include "BinomialTree.h"
-#include "AmericanOption.h"
+#include "legacy/AmericanOption.h"
 
 int main() {
     // Simulate market conditions

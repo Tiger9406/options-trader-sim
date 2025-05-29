@@ -6,30 +6,26 @@
 #define OPTIONS_SIMULATOR_BINOMIALTREE_H
 
 #include <vector>
-#include "../shared/MathUtils.h"
-#include "../shared/OptionEnums.h"
-#include "BinomialWorkspace.h"
+#include "./shared/MathUtils.h"
+#include "./shared/OptionEnums.h"
+#include "./shared/BinomialWorkspace.h"
+#include "./shared/Greeks.h"
+#include "./shared/Option.h"
 
 class BinomialTree {
 public:
     static double price(const Option& opt, int steps = 1000) {
         double dt = opt.T / steps;
-        //up factor; stock price increase by factor of u
-        double u =std::exp(opt.sigma*std::sqrt(dt));
-        //down factor
-        double d = 1.0 /u;
-        //risk neutral probability q
-        double q = (std::exp(opt.r * dt)-d) / (u - d);
-        //discount factor: to calculate how much money is worth today
-        double discount = std::exp(-opt.r * dt);
+        double u =std::exp(opt.sigma*std::sqrt(dt));//up factor; stock price increase by factor of u
+        double d = 1.0 /u; //down factor
+        double q = (std::exp(opt.r * dt)-d) / (u - d); //risk neutral probability q
+        double discount = std::exp(-opt.r * dt); //discount factor: to calculate how much money is worth today
 
         //at terminal, has total steps+1 possible prices
         //likelihood of reaching each terminal price parallel to combinatorics in flipping biased coin
-        /*
-         * Reaching node with k up moves, N-k down moves:
+        /* Reaching node with k up moves, N-k down moves:
          * Price S_k = S_0 * u^k * d^(N-k)
-         * Probability = N choose k * q^k * (1-q)^(N-k)
-         */
+         * Probability = N choose k * q^k * (1-q)^(N-k) */
         std::vector<double> prices(steps + 1);
         std::vector<double> option_values(steps + 1);
 
@@ -59,8 +55,9 @@ public:
 
         return option_values[0];
     }
+
+    //with additional workspace
     static double price(const Option& opt, int steps, BinomialWorkspace& workspace) {
-        workspace.resize(steps);  // Ensure buffer is big enough
         auto& prices = workspace.prices;
         auto& option_values = workspace.optionValues;
 
@@ -94,6 +91,39 @@ public:
         return option_values[0];
     }
 
+    static Greeks computeGreeks(const Option& opt, BinomialWorkspace& workspace, int steps = 1000,
+                                double dS = 0.01, double dT = 1.0 / 365.0,
+                                double dSigma = 0.01, double dR = 0.001) {
+        Option opt_up = opt; opt_up.S += dS;
+        double price_up = price(opt_up, steps, workspace);
+
+        Option opt_down = opt; opt_down.S -= dS;
+        double price_down = price(opt_down, steps, workspace);
+
+        Option opt_mid = opt;
+        double price_mid = price(opt_mid, steps, workspace);
+
+        // Delta & Gamma
+        double delta = (price_up - price_down) / (2 * dS);
+        double gamma = (price_up - 2 * price_mid + price_down) / (dS * dS);
+
+        // Theta
+        Option opt_early = opt; opt_early.T = std::max(opt.T - dT, 1e-8);
+        double price_early = price(opt_early, steps, workspace);
+        double theta = (price_early - price_mid) / dT;
+
+        // Vega
+        Option opt_vol = opt; opt_vol.sigma += dSigma;
+        double price_vol = price(opt_vol, steps, workspace);
+        double vega = (price_vol - price_mid) / dSigma;
+
+        // Rho
+        Option opt_r = opt; opt_r.r += dR;
+        double price_r = price(opt_r, steps, workspace);
+        double rho = (price_r - price_mid) / dR;
+
+        return { delta, gamma, theta, vega, rho };
+    }
 };
 
 

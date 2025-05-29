@@ -6,9 +6,10 @@
 #define OPTIONS_SIMULATOR_BLACKSCHOLES_H
 
 #include <cmath>
-#include "../shared/MathUtils.h"
-#include "../shared/OptionEnums.h"
-#include "../shared/Option.h"
+#include "./shared/MathUtils.h"
+#include "./shared/OptionEnums.h"
+#include "./shared/Option.h"
+#include "./shared/Greeks.h"
 
 class BlackScholes{
 public:
@@ -53,6 +54,38 @@ public:
             return opt.K * opt.T * std::exp(-opt.r * opt.T) * normCDF(d2) / 100.0;
         else
             return -opt.K * opt.T * std::exp(-opt.r * opt.T) * normCDF(-d2) / 100.0;
+    }
+    static Greeks computeGreeks(const Option& opt) {
+        double sqrtT = std::sqrt(opt.T);
+        double d1 = (std::log(opt.S / opt.K) + (opt.r + 0.5 * opt.sigma * opt.sigma) * opt.T) / (opt.sigma * sqrtT);
+        double d2 = d1 - opt.sigma * sqrtT;
+
+        double norm_pdf_d1 = normPDF(d1);
+        double norm_cdf_d1 = normCDF(d1);
+        double norm_cdf_d2 = normCDF(d2);
+        double norm_cdf_neg_d2 = 1.0 - norm_cdf_d2;
+        double discount = std::exp(-opt.r * opt.T);
+
+        bool isCall = (opt.type == Call);
+
+        // Delta
+        double delta = isCall ? norm_cdf_d1 : norm_cdf_d1 - 1.0;
+
+        // Gamma (same for call and put)
+        double gamma = norm_pdf_d1 / (opt.S * opt.sigma * sqrtT);
+
+        // Vega (same for call and put)
+        double vega = opt.S * norm_pdf_d1 * sqrtT / 100.0;
+
+        // Theta
+        double term1 = -(opt.S * norm_pdf_d1 * opt.sigma) / (2.0 * sqrtT);
+        double term2 = opt.r * opt.K * discount * (isCall ? norm_cdf_d2 : norm_cdf_neg_d2);
+        double theta = (term1 + (isCall ? -term2 : term2)) / 365.0;
+
+        // Rho
+        double rho = (opt.K * opt.T * discount * (isCall ? norm_cdf_d2 : -norm_cdf_neg_d2)) / 100.0;
+
+        return { delta, gamma, theta, vega, rho };
     }
 };
 

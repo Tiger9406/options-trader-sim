@@ -6,7 +6,7 @@
 #define OPTIONS_SIMULATOR_OPTIONBATCH_H
 
 #include <vector>
-#include "../shared/Option.h"
+#include "Option.h"
 
 
 struct OptionBatch{

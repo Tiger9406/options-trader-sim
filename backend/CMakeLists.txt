@@ -5,41 +5,31 @@ set(CMAKE_CXX_STANDARD 17)
 
 ##enable OpenMP & optimization flags for multi-core
 find_package(OpenMP REQUIRED)
-add_compile_options(-O3 -march=native)
+add_compile_options(-O3 -march=native -fopenmp)
 
-# Static Library: core
-add_library(core STATIC
-        src/legacy/EuropeanOption.cpp
+file(GLOB CORE_SOURCES CONFIGURE_DEPENDS
+        ${CMAKE_SOURCE_DIR}/src/*.cpp
+        ${CMAKE_SOURCE_DIR}/src/legacy/*.cpp
+)
+add_library(core STATIC ${CORE_SOURCES})
+
+target_include_directories(core PUBLIC
+        ${CMAKE_SOURCE_DIR}/include
+        ${CMAKE_SOURCE_DIR}/include/shared
+        ${CMAKE_SOURCE_DIR}/include/legacy
 )
 
 # Main Executable
 add_executable(options_simulator main.cpp)
-
-target_include_directories(options_simulator PRIVATE
-        src
-        src/shared
-        src/legacy
-        src/pricing
-)
-
 target_link_libraries(options_simulator
         PRIVATE core
         PRIVATE OpenMP::OpenMP_CXX
 )
 
-
 #Performance Test Executable
 add_executable(performance_test
         tests/performance_test.cpp
 )
-
-target_include_directories(performance_test PRIVATE
-        src
-        src/shared
-        src/legacy
-        src/pricing
-)
-
 target_link_libraries(performance_test
         PRIVATE core
         PRIVATE OpenMP::OpenMP_CXX

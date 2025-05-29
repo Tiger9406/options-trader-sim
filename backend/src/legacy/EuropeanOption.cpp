@@ -2,7 +2,7 @@
 // Created by xcao2 on 5/22/2025.
 //
 
-#include "EuropeanOption.h"
+#include "../../include/legacy/EuropeanOption.h"
 #include <cmath>
 #include "../shared/MathUtils.h"
 using namespace std;
