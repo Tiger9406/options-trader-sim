@@ -23,17 +23,17 @@ and will later include a frontend UI (React) and full portfolio/trading manageme
 - Memory reuse for Binomial Tree (thread-local workspace)
 - SIMD + OpenMP batch pricing (1M options in <20ms)
 - Unified dispatcher for European & American pricing
-- American Option pricing via Binomial Tree
+- American Option pricing & Greeks via Binomial Tree
 - Performance Benchmarking
 - Template-separated European Call/Put
 - European Options Greeks (delta, gamma, etc.)
 - C++ pricing engine complete for European call/put
 
 ### In Progress:
-- American Greeks
-- American options speedup: BAW and Ju-Zhong Models
+- Data Flow (I/O)
 
 ### Planned:
+- American options speedup: BAW and Ju-Zhong Models
 - GPU acceleration (maybe)
 - Portfolio simulation: track cash balance, option positions, etc. Methods like buy, sell 
 - Market Simulation: Simulate realistic market conditions: volatility, price movements

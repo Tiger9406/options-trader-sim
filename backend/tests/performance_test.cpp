@@ -224,8 +224,6 @@ void benchmarkDispatcherMixedStyle(int numEuropean, int numAmerican) {
         allOptions.emplace_back(S, K, r, sigma, T, type, styles[i]);
     }
 
-    std::cout << "\n[Unified Dispatcher-Based Benchmarking with Mixed Options]\n";
-
     double totalTime = 0.0;
 
     totalTime += benchmark("Price (All via Dispatcher)", [&]() {
@@ -254,18 +252,16 @@ void benchmarkParallelization(int numEuropean, int numAmerican) {
         allOptions.emplace_back(S, K, r, sigma, T, type, styles[i]);
     }
 
-    std::cout << "\n[Unified Dispatcher-Based Benchmarking with Mixed Options using Parallelization]\n";
-
     auto start = std::chrono::high_resolution_clock::now();
 
-    auto prices = PricingDispatcher::priceBatch(allOptions);
+    auto prices = PricingDispatcher::priceParallelized(allOptions);
     auto end = std::chrono::high_resolution_clock::now();
     double totalTime = std::chrono::duration<double, std::milli>(end - start).count();
 
-    std::cout << "Total Time for Dispatcher-Based Pricing: " << totalTime << " ms\n";
+    std::cout << "Total Time for Dispatcher-Based Pricing " << numEuropean << " European and " << numAmerican << " American: "<< totalTime << " ms\n";
 }
 
-void benchmarkBlackScholesSIMD(int numEuropean){
+void benchmarkBlackScholesSIMD(int numEuropean, int numAmerican){
     std::vector<Option> europeanOptions;
     RandomGenerator rng;
     // Generate options based on shuffled styles
@@ -273,13 +269,13 @@ void benchmarkBlackScholesSIMD(int numEuropean){
         auto [S, K, r, sigma, T, type] = rng.generateOptionParams();
         europeanOptions.emplace_back(S, K, r, sigma, T, type, OptionStyle::European);
     }
-    auto batch = toEuropeanBatch(europeanOptions);
+    auto batch = toBatch(europeanOptions);
     auto start = std::chrono::high_resolution_clock::now();
-    auto prices = PricingDispatcher::priceBatchSIMD(batch);
+    auto prices = PricingDispatcher::priceBatch(batch);
     auto end = std::chrono::high_resolution_clock::now();
+    auto totalTime = std::chrono::duration<double, std::milli>(end - start).count();
 
-    std::cout << "Batch Black-Scholes include took: "
-              << std::chrono::duration<double, std::milli>(end - start).count()
+    std::cout << "Batch Black-Scholes SIMD " << numEuropean << " European and " << numAmerican << " American: "<< totalTime
               << " ms\n";
 }
 
@@ -299,11 +295,11 @@ int main() {
 
     //======== Benchmarks for dispatcher & observing time difference ========
     //in having separated European & American vs all together
-    //benchmarkDispatcherSeparateStyle(NUM_EUROPEAN_OPTIONS, NUM_AMERICAN_OPTIONS);
+//    benchmarkDispatcherSeparateStyle(NUM_EUROPEAN_OPTIONS, NUM_AMERICAN_OPTIONS);
     //benchmarkDispatcherMixedStyle(NUM_EUROPEAN_OPTIONS, NUM_AMERICAN_OPTIONS);
 
     //======== Batch processing: allow parallelization; significantly faster ========
-    benchmarkParallelization(NUM_EUROPEAN_OPTIONS, NUM_AMERICAN_OPTIONS);
-    benchmarkBlackScholesSIMD(NUM_EUROPEAN_OPTIONS);
+    benchmarkParallelization(NUM_EUROPEAN_OPTIONS, 0);
+    benchmarkBlackScholesSIMD(NUM_EUROPEAN_OPTIONS, 0);
     return 0;
 }

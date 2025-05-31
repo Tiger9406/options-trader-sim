@@ -15,8 +15,8 @@
 class PricingDispatcher {
 public:
     static double price(const Option& opt);
-    static std::vector<double> priceBatch(const std::vector<Option>& opts, int steps=1000);
-    static std::vector<double> priceBatchSIMD(const OptionBatch& batch);
+    static std::vector<double> priceParallelized(const std::vector<Option>& opts, int steps=1000);
+    static std::vector<double> priceBatch(const OptionBatch& batch, int steps = 1000);
     static std::vector<double> priceBatchBinomialWorkspace(const std::vector<Option>& opts, int steps = 1000);
     static std::vector<GreekResult> priceAndGreeks(const std::vector<Option>& opts, int steps = 1000);
     std::vector<Greeks> greeks(const std::vector<Option>& opts, int steps = 1000);
