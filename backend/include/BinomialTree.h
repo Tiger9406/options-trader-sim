@@ -90,6 +90,37 @@ public:
 
         return option_values[0];
     }
+    //overload for soa
+    static double price(double S, double K, double r, double sigma, double T, OptionType type, int steps, BinomialWorkspace& workspace) {
+        auto& prices = workspace.prices;
+        auto& option_values = workspace.optionValues;
+
+        double dt = T / steps;
+        double u = std::exp(sigma * std::sqrt(dt));
+        double d = 1.0 / u;
+        double q = (std::exp(r * dt) - d) / (u - d);
+        double discount = std::exp(-r * dt);
+        for (int i = 0; i <= steps; i++) {
+            prices[i] = S * std::pow(u, steps - i) * std::pow(d, i);
+            if (type == OptionType::Call)
+                option_values[i] = std::max(prices[i] - K, 0.0);
+            else
+                option_values[i] = std::max(K - prices[i], 0.0);
+        }
+        for (int step = steps - 1; step >= 0; step--) {
+            for (int i = 0; i <= step; i++) {
+                prices[i] /= u;
+                double continuation = discount * (q * option_values[i] + (1 - q) * option_values[i + 1]);
+                double exercise;
+                if (type == OptionType::Call)
+                    exercise = std::max(prices[i] - K, 0.0);
+                else
+                    exercise = std::max(K - prices[i], 0.0);
+                option_values[i] = std::max(continuation, exercise);
+            }
+        }
+        return option_values[0];
+    }
 
     static Greeks computeGreeks(const Option& opt, BinomialWorkspace& workspace, int steps = 1000,
                                 double dS = 0.01, double dT = 1.0 / 365.0,

@@ -26,6 +26,16 @@ public:
         else
             return normCDF(-d2)*opt.K*exp(-opt.r*opt.T)-normCDF(-d1)*opt.S;
     }
+    //overloaded to accept SoA
+    static double price(double S, double K, double r, double sigma, double T, OptionType type){
+        double d1 = (std::log(S/K)+(r+sigma*sigma/2)*T)/(sigma*std::sqrt(T));
+        double d2 = d1-sigma*std::sqrt(T);
+
+        if(type == OptionType::Call)
+            return normCDF(d1)*S-normCDF(d2)*K*exp(-r*T);
+        else
+            return normCDF(-d2)*K*exp(-r*T)-normCDF(-d1)*S;
+    }
     static double delta(const Option& opt){
         double d1 = (std::log(opt.S / opt.K) + (opt.r + 0.5 * opt.sigma * opt.sigma) * opt.T) / (opt.sigma * sqrt(opt.T));
         return opt.type == Call ? normCDF(d1) : normCDF(d1) - 1.0;
