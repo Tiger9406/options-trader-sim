@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.26)
+cmake_minimum_required(VERSION 3.22)
 project(options_simulator)
 
 set(CMAKE_CXX_STANDARD 17)
@@ -29,6 +29,8 @@ target_link_libraries(options_simulator
 #Performance Test Executable
 add_executable(performance_test
         tests/performance_test.cpp
+        tests/DispatcherBenchmarks.cpp
+        tests/legacy/TemplateBenchmarks.cpp
 )
 target_link_libraries(performance_test
         PRIVATE core
