@@ -1,62 +1,51 @@
+#include <boost/asio.hpp>
 #include <iostream>
-#include <memory>
-#include <chrono>
-#include "legacy/EuropeanOption.h"
-#include "OptionEnums.h"
-#include "BlackScholes.h"
-#include "BinomialTree.h"
-#include "legacy/AmericanOption.h"
+#include <thread>
+#include "MarketDataFeed.h"
+#include "include/shared/OptionBatch.h"
+#include "include/PricingDispatcher.h"
+#include "tests/BenchmarkUtils.h"
 
 int main() {
-    // Simulate market conditions
-    double S = 100.0;
-    double K = 101.0;
-    double r = 0.04;
-    double T = 1.5;
-    double sigma = 0.1;
+    constexpr size_t NUM_EUROPEAN = 100000;
+    constexpr size_t NUM_American = 10000;
 
-    auto start = std::chrono::high_resolution_clock::now();
-    double val;
-    auto end = std::chrono::high_resolution_clock::now();
+    constexpr int tickIntervalMs = 100;
+    constexpr double dt = 1.0 / 365.0;
 
-    // ===== INHERITANCE TEST =====
-    std::unique_ptr<OptionClass> callOption = std::make_unique<EuropeanOptionInheritance>(S, K, r, sigma, T, Call);
+    OptionBatch batch;
+    batch.reserve(NUM_American+NUM_EUROPEAN);
 
-    start = std::chrono::high_resolution_clock::now();
-    val = callOption->price();
-    end = std::chrono::high_resolution_clock::now();
-    std::chrono::duration<double, std::nano> duration_inheritance = end - start;
+    // random option batch through testing util
+    std::vector<Option> options = generateMixedOptions(NUM_EUROPEAN, NUM_American);
+    batch = toBatch(options);
 
-    // ===== TEMPLATE TEST =====
-    EuropeanOption callOption_Template(S, K, r, sigma, T, Call);
+    // asio prep
+    boost::asio::io_context io;
 
-    start = std::chrono::high_resolution_clock::now();
-    val = BlackScholes<EuropeanOption>::price(callOption_Template);
-    end = std::chrono::high_resolution_clock::now();
-    std::chrono::duration<double, std::nano> duration_template = end - start;
+    //random fluctuation to price & volatility
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    std::normal_distribution<> noise(0.0, 0.01);
 
-    // ==== TEMPLATE SEPARATE TEST ====
-    EuropeanCallOption callOption_Separate(S, K, r, sigma, T);
+    // define call back per tick
+    auto onTick = [&]() {
+        for (size_t i = 0; i < batch.size(); ++i) {
+            batch.S[i] += batch.S[i] * noise(gen);
+            batch.sigma[i] = std::max(0.01, batch.sigma[i] + 0.01 * noise(gen));
+            batch.T[i] = std::max(1e-6, batch.T[i] - dt);
+        }
 
-    start = std::chrono::high_resolution_clock::now();
-    val = BlackScholesSeparated<EuropeanCallOption>::price(callOption_Separate);
-    end = std::chrono::high_resolution_clock::now();
-    std::chrono::duration<double, std::nano> duration_template_separate = end - start;
+        auto prices = PricingDispatcher::priceBatch(batch, 1000);
+        std::cout << "Tick: " << prices[0] << " ... " << prices[prices.size() - 1] << std::endl;
+    };
 
-    // ==== TEMPLATE SEPARATE AMERICAN PUT TEST ====
-    AmericanPutOption putOption_Separate(S, K, r, sigma, T);
+    // start market feed
+    MarketDataFeed feed(io, onTick, tickIntervalMs);
+    feed.start();
 
-    start = std::chrono::high_resolution_clock::now();
-    val = BinomialTree<AmericanPutOption>::price(putOption_Separate);
-    end = std::chrono::high_resolution_clock::now();
-    std::chrono::duration<double, std::nano> american_duration = end - start;
-
-
-    // Output results
-    std::cout << "Inheritance price():       " << duration_inheritance.count() << " ns\n";
-    std::cout << "Template price():          " << duration_template.count() << " ns\n";
-    std::cout << "Template Separate price(): " << duration_template_separate.count() << " ns\n";
-    std::cout << "American BT price():       " << american_duration.count() << " ns\n";
+    // run
+    io.run();
 
     return 0;
 }

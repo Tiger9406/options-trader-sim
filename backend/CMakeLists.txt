@@ -29,7 +29,7 @@ target_link_libraries(core
 )
 
 # Main Executable
-add_executable(options_simulator main.cpp)
+add_executable(options_simulator main.cpp src/MarketDataFeed.cpp)
 target_link_libraries(options_simulator PRIVATE core)
 
 #Performance Test Executable
