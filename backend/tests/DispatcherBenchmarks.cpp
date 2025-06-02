@@ -10,7 +10,6 @@
 #include <chrono>
 #include <iostream>
 #include <vector>
-#include <algorithm>
 
 void benchmarkDispatcherSeparateStyle(int numEuropean, int numAmerican) {
     std::vector<Option> europeanOptions = generateOptions(numEuropean, OptionStyle::European);

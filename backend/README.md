@@ -1,7 +1,8 @@
 # Options Trading Simulator Backend
 
 A performance-oriented C++ backend for a full-fledged options trading application. This backend 
-currently simulates European options using the Black-Scholes model.
+currently simulates European options using the Black-Scholes model and American options using 
+Binomial Tree model.
 
 I hope to learn the mathematical reasoning behind options pricing, focusing on system design and financial realism.
 
@@ -33,23 +34,36 @@ backend/
     benchmarks/
        BENCHMARKS.md
        legacy_benchmarks.txt 
-    src/
-        pricing/
-            BatchPricing.h
-            BinomialTree.h
-            BlackScholes.h
-            OptionBatch.h
-            PricingDispatcher.h
-            TemplatePricing.h
+    include/
+        legacy/
+            AmericanOption.h
+            EuropeanOption.h
+            OptionClass.h
+            TempalatePricing.h
         shared/
+            BinomialWorkspace.h
+            Greeks.h
+            MathUtils.h
             Option.h
-            MathUtil.h
+            OptionBatch.h
             OptionEnums.h
+        simulation/
+            MarketDataFeed.cpp
+            MarketDataFeed.h
+        BinomialTree.h
+        BlackScholes.h
+        PricingDispatcher.h
+    src/
         legacy/
             EuropeanOption.cpp
-            EuropeanOption.h
-            AmericanOption.h
+        PricingDispatcher.cpp
     tests/
+        legacy/
+            TemplateBenchmarks.cpp
+            TemplateBenchmarks.h
+        BenchmarkUtils.h
+        DispatcherBenchmarks.cpp
+        DispatcherBenchmarks.h
         performance_test.cpp
     CMakeLists.txt
     main.cpp

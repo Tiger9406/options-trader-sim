@@ -20,6 +20,7 @@ and will later include a frontend UI (React) and full portfolio/trading manageme
 ## Status
 
 ### Completed (Reverse Chronological Order):
+- Transition to Linux (WSL)
 - Memory reuse for Binomial Tree (thread-local workspace)
 - SIMD + OpenMP batch pricing (1M options in <20ms)
 - Unified dispatcher for European & American pricing
@@ -30,7 +31,7 @@ and will later include a frontend UI (React) and full portfolio/trading manageme
 - C++ pricing engine complete for European call/put
 
 ### In Progress:
-- Data Flow (I/O)
+- Data Flow (I/O): Market Data Feed
 
 ### Planned:
 - American options speedup: BAW and Ju-Zhong Models
@@ -48,12 +49,33 @@ and will later include a frontend UI (React) and full portfolio/trading manageme
 - **Dispatcher Model**: Dynamically chooses between models based on option style (European vs American)
 
 ---
-## Build & Run (C++ backend)
+## Build & Run (C++ Backend on Linux with Boost.Asio + OpenMP)
 
 ```bash
+# Enter your backend project directory
 cd backend
-mkdir build && cd build
+
+# Create a build directory and run CMake
+mkdir -p build && cd build
 cmake ..
-make
+
+# Build with all cores
+make -j$(nproc)
+
+# Run the simulator
 ./options_simulator
 ```
+
+### Requirements (Ubuntu/WSL)
+
+Make sure you have the following dependencies installed:
+
+```bash
+sudo apt update
+sudo apt install build-essential cmake libboost-all-dev
+```
+
+This installs:
+- GCC with OpenMP support
+- Boost (including Boost.Asio)
+- CMake for building the project

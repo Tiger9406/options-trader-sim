@@ -7,6 +7,9 @@ set(CMAKE_CXX_STANDARD 17)
 find_package(OpenMP REQUIRED)
 add_compile_options(-O3 -march=native -fopenmp)
 
+find_package(Boost REQUIRED COMPONENTS system)
+include_directories(${Boost_INCLUDE_DIRS})
+
 file(GLOB CORE_SOURCES CONFIGURE_DEPENDS
         ${CMAKE_SOURCE_DIR}/src/*.cpp
         ${CMAKE_SOURCE_DIR}/src/legacy/*.cpp
@@ -19,12 +22,15 @@ target_include_directories(core PUBLIC
         ${CMAKE_SOURCE_DIR}/include/legacy
 )
 
+target_link_libraries(core
+        PUBLIC Boost::system
+        PUBLIC OpenMP::OpenMP_CXX
+        PUBLIC pthread
+)
+
 # Main Executable
 add_executable(options_simulator main.cpp)
-target_link_libraries(options_simulator
-        PRIVATE core
-        PRIVATE OpenMP::OpenMP_CXX
-)
+target_link_libraries(options_simulator PRIVATE core)
 
 #Performance Test Executable
 add_executable(performance_test
@@ -32,7 +38,4 @@ add_executable(performance_test
         tests/DispatcherBenchmarks.cpp
         tests/legacy/TemplateBenchmarks.cpp
 )
-target_link_libraries(performance_test
-        PRIVATE core
-        PRIVATE OpenMP::OpenMP_CXX
-)
+target_link_libraries(performance_test PRIVATE core)
