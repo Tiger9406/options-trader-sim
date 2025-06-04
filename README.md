@@ -20,6 +20,7 @@ and will later include a frontend UI (React) and full portfolio/trading manageme
 ## Status
 
 ### Completed (Reverse Chronological Order):
+- Data Flow (I/O): Market Data Feed
 - Transition to Linux (WSL)
 - Memory reuse for Binomial Tree (thread-local workspace)
 - SIMD + OpenMP batch pricing (1M options in <20ms)
@@ -31,10 +32,12 @@ and will later include a frontend UI (React) and full portfolio/trading manageme
 - C++ pricing engine complete for European call/put
 
 ### In Progress:
-- Data Flow (I/O): Market Data Feed
+- American options speedup: BAW and Ju-Zhong Models
 
 ### Planned:
-- American options speedup: BAW and Ju-Zhong Models
+- Look into saving previously calculated Binomial Tree Prices,
+avoid recalculation ever steps; have to fix ticks per unit time &
+shift tree instead of recalculate
 - GPU acceleration (maybe)
 - Portfolio simulation: track cash balance, option positions, etc. Methods like buy, sell 
 - Market Simulation: Simulate realistic market conditions: volatility, price movements

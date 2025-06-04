@@ -72,8 +72,8 @@ backend/
 
 ## Functionality
 
-### European Options (Black-Scholes Model)
-This simulator generates a price for European options using the Black-Scholes Model:
+### European Options (Analytical solution to Black-Scholes Model)
+This simulator generates a price for European options using the solution to the Black-Scholes Model:
 ```
 Call = S * N(d1) - K * e^(-rT) * N(d2)
 ```
@@ -104,10 +104,15 @@ The model calculates fair value based on:
 This simulator generates prices for American options using a Binomial Tree model, which unlike European
 options, can be exercised at any time before the expiration time.
 
+Whaley: good for very short maturities & good for very long maturities; approximates solution to PDE
+via neglecting term, where assumption works best when term is 0.
+
+
+
 #### Model Features
 - **Iterative Tree Construction**: Utilizes vector-based (not recursive) for speed and stability
 - **Preallocated Buffers**: Reuses memory, reducing heap allocations in batch runs
 ### Benchmarked Performance
-- **European Options (1M calls)**: ~18–20ms
-- **American Options (10k options)**: ~400ms with OpenMP & Parallelization
+- **European Options (1M calls)**: ~12–20ms via SIMD & Parallelization
+- **American Options (10k options)**: ~250-400ms with OpenMP & Parallelization
 - **Unified Mixed-Style Dispatcher**: Efficiently handles input with differing styles & types

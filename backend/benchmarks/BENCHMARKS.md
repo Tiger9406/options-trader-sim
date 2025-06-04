@@ -36,23 +36,23 @@
 
 ### Dispatcher Mixed Style (Parallelized)
 - **European + American Options**:  
-  ⏱ **405.129 ms**
+  ⏱ **297.867 ms**
 
 ---
 
 ### Dispatcher (Parallelized) – Only European
 - **1,000,000 Options**:  
-  ⏱ **17.7403 ms**
+  ⏱ **16.3552 ms**
 
 ---
 
 ### Dispatcher (Parallelized) – Only American
 - **10,000 Options**:  
-  ⏱ **404.089 ms**
+  ⏱ **291.376 ms**
 
 ---
 
 ### Black-Scholes SIMD (Parallelized) - Only European
 - **1,000,000 European Options**:  
-  ⏱ **15.8119 ms**
+  ⏱ **12.5857 ms**
 
