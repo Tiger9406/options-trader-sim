@@ -8,7 +8,8 @@
 #include "./shared/Option.h"
 
 namespace BAW{
-    double price(const Option& opt, int steps = 0);
+    double price(const Option& opt, int steps = 100);
+    double priceParameters(double S, double K, double r, double sigma, double T, double q, OptionType type, int steps = 100);
 }
 
 #endif //OPTIONS_SIMULATOR_BAW_H

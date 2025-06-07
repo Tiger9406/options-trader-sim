@@ -56,7 +56,8 @@ std::vector<double> PricingDispatcher::priceBatch(const OptionBatch& batch, int 
             if (batch.style[i] == OptionStyle::European)
                 prices[i] = BlackScholes::priceParameter(batch.S[i], batch.K[i], batch.r[i], batch.sigma[i], batch.T[i], batch.q[i], batch.type[i]);
             else
-                prices[i] = BinomialTree::priceParametersWorkspace(batch.S[i], batch.K[i], batch.r[i], batch.sigma[i], batch.T[i], batch.q[i], batch.type[i], steps, workspace);
+                prices[i] = BAW::priceParameters(batch.S[i], batch.K[i], batch.r[i], batch.sigma[i], batch.T[i], batch.q[i], batch.type[i], steps);
+//                prices[i] = BinomialTree::priceParametersWorkspace(batch.S[i], batch.K[i], batch.r[i], batch.sigma[i], batch.T[i], batch.q[i], batch.type[i], steps, workspace);
         }
     }
     return prices;

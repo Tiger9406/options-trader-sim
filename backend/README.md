@@ -86,6 +86,7 @@ The model calculates fair value based on:
 - Time to expiration (T)
 - Risk-free rate (r)
 - Volatility (σ)
+- Dividend rate (q)
 #### Greeks Calculated
 - **Delta**: sensitivity of option price w/ respect to underlying/spot price
 - **Gamma**: sensitivity of Delta w/ respect to underlying price; second derivative
@@ -101,18 +102,27 @@ The model calculates fair value based on:
 - **Memory Reuse for American Options**: Binomial Tree model uses thread-local `BinomialWorkspace` to eliminate repeated vector allocations
 
 ### American
-This simulator generates prices for American options using a Binomial Tree model, which unlike European
+This simulator generates prices for American options using a Barone Whaley Model, which unlike European
 options, can be exercised at any time before the expiration time.
 
-Whaley: good for very short maturities & good for very long maturities; approximates solution to PDE
-via neglecting term, where assumption works best when term is 0.
+#### Whaley
+Whaley: good for very short maturities & good for very long maturities; extends the classic
+Black-Scholes model, accounting for early exercise premium. It has O(n) time complexity.
 
+- **Newton's Method**: iteratively find the critical stock price, where early exercise is optimal
+- **Fallback**: If fails to converge, fallback to accurate, slower binomial tree (0.25% chance on randomly generated options)
 
+#### Binomial Tree
+Previously implemented; still used to compare to for accuracy. Extremely accurate but takes 
+too long to compute, has a recursive nature to it, where it does backward induction for k steps,
+resulting in an n^2 operation per option
 
-#### Model Features
 - **Iterative Tree Construction**: Utilizes vector-based (not recursive) for speed and stability
 - **Preallocated Buffers**: Reuses memory, reducing heap allocations in batch runs
+
+
 ### Benchmarked Performance
 - **European Options (1M calls)**: ~12–20ms via SIMD & Parallelization
-- **American Options (10k options)**: ~250-400ms with OpenMP & Parallelization
+- **American Options (1M options)**: ~250-400ms with OpenMP & Parallelization for BAW
+  - For Binomial Tree: 30,000ms-37,000 ms
 - **Unified Mixed-Style Dispatcher**: Efficiently handles input with differing styles & types

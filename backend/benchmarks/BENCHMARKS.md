@@ -35,8 +35,8 @@
 ## 3. With Full Parallelization
 
 ### Dispatcher Mixed Style (Parallelized)
-- **European + American Options**:  
-  ⏱ **297.867 ms**
+- **European + American Options; 1,000,000 each, total 2 million**:  
+  ⏱ **1060.48 ms**
 
 ---
 
@@ -47,12 +47,13 @@
 ---
 
 ### Dispatcher (Parallelized, Binomial) – Only American
-- **10,000 Options**:  
-  ⏱ **291.376 ms**
+- **1,000,000 Options**:  
+  ⏱ **35486.1 ms**
+
 ---
 ### Dispatcher (Parallelized, BAW) – Only American
-- **10,000 Options**:  
-  ⏱ **0.271114 ms**
+- **1,000,000 Options**:  
+  ⏱ **1096.54 ms**; 0.25% chance of fall back
 
 ---
 

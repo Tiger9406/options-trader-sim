@@ -7,8 +7,8 @@
 #include "tests/BenchmarkUtils.h"
 
 int main() {
-    constexpr size_t NUM_EUROPEAN = 100000;
-    constexpr size_t NUM_American = 10000;
+    constexpr size_t NUM_EUROPEAN = 500000;
+    constexpr size_t NUM_American = 500000;
 
     constexpr int tickIntervalMs = 100;
     constexpr double dt = 1.0 / 365.0;

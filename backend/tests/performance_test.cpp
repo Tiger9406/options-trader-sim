@@ -6,11 +6,11 @@
 #include <iomanip>
 
 
-void summarizePricingErrors(const std::vector<double>& binomialPrices,
-                            const std::vector<double>& BAWPrices,
+void summarizePricingErrors(const std::vector<double>& prices1,
+                            const std::vector<double>& prices2,
                             const std::vector<Option>& options) {
-    size_t n = binomialPrices.size();
-    if (n != BAWPrices.size() || n != options.size()) {
+    size_t n = prices1.size();
+    if (n != prices2.size() || n != options.size()) {
         std::cerr << "Error: Vector sizes must match.\n";
         return;
     }
@@ -18,7 +18,7 @@ void summarizePricingErrors(const std::vector<double>& binomialPrices,
     struct FullErrorInfo {
         size_t index;
         Option opt;
-        double bin, baw, absErr, relErr;
+        double price1, price2, absErr, relErr;
     };
 
     const double MIN_DENOMINATOR = 1e-2;
@@ -29,8 +29,8 @@ void summarizePricingErrors(const std::vector<double>& binomialPrices,
     std::vector<FullErrorInfo> fullErrors;
 
     for (size_t i = 0; i < n; ++i) {
-        double bin = binomialPrices[i];
-        double baw = BAWPrices[i];
+        double bin = prices1[i];
+        double baw = prices2[i];
         double absErr = std::abs(bin - baw);
 
         absErrorSum += absErr;
@@ -67,8 +67,8 @@ void summarizePricingErrors(const std::vector<double>& binomialPrices,
         return a.relErr > b.relErr;
     });
 
-    std::cout << "\nWorst Offenders (Top 10 by Absolute Error):\n";
-    std::cout << "Idx  Type   S        K        r       q       sig     T       Binom     BAW       AbsErr     RelErr%\n";
+    std::cout << "\nWorst Offenders (Top 10 by Relative Error):\n";
+    std::cout << "Idx  Type   S        K        r       q       sig     T        Model1   Model2   AbsErr     RelErr%\n";
     std::cout << "---- ------ -------- -------- ------- ------- ------- -------- -------- -------- ------------\n";
 
     for (size_t i = 0; i < std::min<size_t>(10, fullErrors.size()); ++i) {
@@ -83,8 +83,8 @@ void summarizePricingErrors(const std::vector<double>& binomialPrices,
                   << std::setw(7)  << e.opt.q     << " "
                   << std::setw(7)  << e.opt.sigma << " "
                   << std::setw(7)  << e.opt.T     << " "
-                  << std::setw(8)  << e.bin       << " "
-                  << std::setw(8)  << e.baw       << " "
+                  << std::setw(8)  << e.price1    << " "
+                  << std::setw(8)  << e.price2    << " "
                   << std::setw(8)  << e.absErr    << " "
                   << std::setw(12) << e.relErr * 100 << "%\n";
     }
@@ -92,15 +92,16 @@ void summarizePricingErrors(const std::vector<double>& binomialPrices,
 
 int main() {
     constexpr int NUM_EUROPEAN = 1'000'000;
-    constexpr int NUM_AMERICAN = 10'000;
+    constexpr int NUM_AMERICAN = 1'000'000;
 
-//    benchmarkDispatcherSeparateStyle(NUM_EUROPEAN, NUM_AMERICAN);
-//    benchmarkDispatcherMixedStyle(NUM_EUROPEAN, NUM_AMERICAN);
+
     std::vector<Option> allOptions = generateMixedOptions(0, NUM_AMERICAN);
-    std::vector<double> binomialPrices = benchmarkParallelization(&BinomialTree::price, 0, NUM_AMERICAN, allOptions);
+//    std::vector<double> binomialPrices = benchmarkParallelization(&BinomialTree::price, 0, NUM_AMERICAN, allOptions);
     std::vector<double> BAWPrices = benchmarkParallelization(&BAW::price, 0, NUM_AMERICAN, allOptions);
-    std::vector<double> blackScholesPrice = benchmarkParallelization(&BAW::price, NUM_EUROPEAN, 0);
+//    std::vector<double> blackScholesPrice = benchmarkParallelization(&BAW::price, NUM_EUROPEAN, 0);
+//    summarizePricingErrors(binomialPrices, BAWPrices, allOptions);
 
-    summarizePricingErrors(binomialPrices, BAWPrices, allOptions);
+//    std::vector<double> BAW_BlackScholesPrices = benchmarkParallelization(&BAW::price, NUM_EUROPEAN, NUM_AMERICAN);
+
     return 0;
 }

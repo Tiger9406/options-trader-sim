@@ -20,6 +20,8 @@ and will later include a frontend UI (React) and full portfolio/trading manageme
 ## Status
 
 ### Completed (Reverse Chronological Order):
+- American Option speedup: BAW
+- Consideration of dividends
 - Data Flow (I/O): Market Data Feed
 - Transition to Linux (WSL)
 - Memory reuse for Binomial Tree (thread-local workspace)
@@ -32,8 +34,7 @@ and will later include a frontend UI (React) and full portfolio/trading manageme
 - C++ pricing engine complete for European call/put
 
 ### In Progress:
-- American options speedup: BAW and Ju-Zhong Models
-- Include consideration of dividend yield in Option & models
+- American options speedup: Ju-Zhong Models
 
 ### Planned:
 - Look into saving previously calculated Binomial Tree Prices,

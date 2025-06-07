@@ -114,6 +114,38 @@ double BinomialTree::priceParametersWorkspace(double S, double K, double r, doub
     return option_values[0];
 }
 
+double BinomialTree::priceParameters(double S, double K, double r, double sigma, double T, double q,
+                                              OptionType type, int steps) {
+    std::vector<double> prices(steps + 1);
+    std::vector<double> option_values(steps + 1);
+
+    double dt = T / steps;
+    double u = std::exp(sigma * std::sqrt(dt));
+    double d = 1.0 / u;
+    double p = (std::exp((r-q) * dt) - d) / (u - d);
+    double discount = std::exp(-r * dt);
+    for (int i = 0; i <= steps; i++) {
+        prices[i] = S * std::pow(u, steps - i) * std::pow(d, i);
+        if (type == OptionType::Call)
+            option_values[i] = std::max(prices[i] - K, 0.0);
+        else
+            option_values[i] = std::max(K - prices[i], 0.0);
+    }
+    for (int step = steps - 1; step >= 0; step--) {
+        for (int i = 0; i <= step; i++) {
+            prices[i] /= u;
+            double continuation = discount * (p * option_values[i] + (1 - p) * option_values[i + 1]);
+            double exercise;
+            if (type == OptionType::Call)
+                exercise = std::max(prices[i] - K, 0.0);
+            else
+                exercise = std::max(K - prices[i], 0.0);
+            option_values[i] = std::max(continuation, exercise);
+        }
+    }
+    return option_values[0];
+}
+
 Greeks BinomialTree::computeGreeks(const Option& opt, BinomialWorkspace& workspace, int steps,
                                           double dS, double dT,
                                           double dSigma, double dR) {
