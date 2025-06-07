@@ -40,7 +40,7 @@ public:
     std::uniform_real_distribution<double> strike{90, 110};
     std::uniform_real_distribution<double> rate{0.01, 0.05};
     std::uniform_real_distribution<double> vol{0.05, 0.3};
-    std::uniform_real_distribution<double> expiry{0.1, 2.0};
+    std::uniform_real_distribution<double> expiry{0.2, 2.0};
     std::uniform_real_distribution<double> div_yield{0.0, 0.04};
     std::bernoulli_distribution callPut{0.5};
 

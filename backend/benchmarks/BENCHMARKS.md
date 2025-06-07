@@ -46,9 +46,13 @@
 
 ---
 
-### Dispatcher (Parallelized) – Only American
+### Dispatcher (Parallelized, Binomial) – Only American
 - **10,000 Options**:  
   ⏱ **291.376 ms**
+---
+### Dispatcher (Parallelized, BAW) – Only American
+- **10,000 Options**:  
+  ⏱ **0.271114 ms**
 
 ---
 

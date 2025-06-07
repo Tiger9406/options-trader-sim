@@ -11,14 +11,19 @@
 #include "./shared/Option.h"
 #include "./shared/BinomialWorkspace.h"
 #include "./shared/OptionBatch.h"
+using AmericanPricerFn = double(*)(const Option&, int);
 
 class PricingDispatcher {
 public:
+    //General
     static double price(const Option& opt);
-    static std::vector<double> priceParallelized(const std::vector<Option>& opts, int steps=1000);
+    static std::vector<double> priceParallelized(const std::vector<Option>& opts, AmericanPricerFn americanPricer, int steps=1000);
     static std::vector<double> priceBatch(const OptionBatch& batch, int steps = 1000);
-    static std::vector<double> priceBatchSIMD(const OptionBatch& batch);
+
+    //test specific methods
+    static std::vector<double> priceBatchBlackScholesSIMD(const OptionBatch& batch);
     static std::vector<double> priceBatchBinomialWorkspace(const std::vector<Option>& opts, int steps = 1000);
+
     static std::vector<GreekResult> priceAndGreeks(const std::vector<Option>& opts, int steps = 1000);
     std::vector<Greeks> greeks(const std::vector<Option>& opts, int steps = 1000);
 

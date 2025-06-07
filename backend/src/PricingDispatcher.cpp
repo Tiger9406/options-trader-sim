@@ -6,6 +6,7 @@
 #include "BlackScholes.h"
 #include "BinomialTree.h"
 #include "BinomialWorkspace.h"
+#include "BAW.h"
 #include <cmath>
 #include <stdexcept>
 #include <omp.h>
@@ -21,21 +22,21 @@ double PricingDispatcher::price(const Option& opt) {
             throw std::invalid_argument("Unknown option style");
     }
 }
+
 // barch include w/ parallelization
-std::vector<double> PricingDispatcher::priceParallelized(const std::vector<Option>& opts, int steps){
+std::vector<double> PricingDispatcher::priceParallelized(const std::vector<Option>& opts, AmericanPricerFn americanPricer, int steps){
     std::vector<double> prices(opts.size());
 
     //allow parallelization across cpus; no vars shared
-    #pragma omp parallel default(none) shared(opts, prices, steps)
+    #pragma omp parallel default(none) shared(opts, prices, steps, americanPricer)
     {
-//            BinomialWorkspace workspace(steps); //declared inside for thread local; better at greater scale
         //split up
         #pragma omp for
         for (int i = 0; i < opts.size(); i++) {
             if (opts[i].style == OptionStyle::European) {
                 prices[i] = BlackScholes::price(opts[i]);
             } else {
-                prices[i] = BinomialTree::price(opts[i]);
+                prices[i] = americanPricer(opts[i], steps);
             }
         }
     }
@@ -53,15 +54,15 @@ std::vector<double> PricingDispatcher::priceBatch(const OptionBatch& batch, int 
     #pragma omp for
         for (int i = 0; i < N; ++i) {
             if (batch.style[i] == OptionStyle::European)
-                prices[i] = BlackScholes::price(batch.S[i], batch.K[i], batch.r[i], batch.sigma[i], batch.T[i], batch.q[i], batch.type[i]);
+                prices[i] = BlackScholes::priceParameter(batch.S[i], batch.K[i], batch.r[i], batch.sigma[i], batch.T[i], batch.q[i], batch.type[i]);
             else
-                prices[i] = BinomialTree::price(batch.S[i], batch.K[i], batch.r[i], batch.sigma[i], batch.T[i], batch.q[i], batch.type[i], steps, workspace);
+                prices[i] = BinomialTree::priceParametersWorkspace(batch.S[i], batch.K[i], batch.r[i], batch.sigma[i], batch.T[i], batch.q[i], batch.type[i], steps, workspace);
         }
     }
     return prices;
 }
 
-std::vector<double> PricingDispatcher::priceBatchSIMD(const OptionBatch& batch){
+std::vector<double> PricingDispatcher::priceBatchBlackScholesSIMD(const OptionBatch& batch){
     size_t N = batch.size();
     std::vector<double> prices(N);
 
@@ -88,7 +89,7 @@ std::vector<double> PricingDispatcher::priceBatchBinomialWorkspace(const std::ve
         BinomialWorkspace workspace(steps); // Thread-local
         #pragma omp for
         for (int i = 0; i < static_cast<int>(opts.size()); i++) {
-            prices[i] = BinomialTree::price(opts[i], steps, workspace);
+            prices[i] = BinomialTree::priceWorkspace(opts[i], steps, workspace);
         }
     }
     return prices;
@@ -108,7 +109,7 @@ std::vector<GreekResult> PricingDispatcher::priceAndGreeks(const std::vector<Opt
                 res.price = BlackScholes::price(opt);
                 res.greeks = BlackScholes::computeGreeks(opt);
             } else {
-                res.price = BinomialTree::price(opt, steps, workspace);
+                res.price = BinomialTree::priceWorkspace(opt, steps, workspace);
                 res.greeks = BinomialTree::computeGreeks(opt, workspace); // will reuse workspace; also using default parameters
             }
 

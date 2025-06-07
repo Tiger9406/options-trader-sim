@@ -48,7 +48,7 @@ double BinomialTree::price(const Option& opt, int steps) {
     return option_values[0];
 }
 
-double BinomialTree::price(const Option& opt, int steps, BinomialWorkspace& workspace) {
+double BinomialTree::priceWorkspace(const Option &opt, int steps, BinomialWorkspace &workspace) {
     auto& prices = workspace.prices;
     auto& option_values = workspace.optionValues;
 
@@ -82,7 +82,8 @@ double BinomialTree::price(const Option& opt, int steps, BinomialWorkspace& work
     return option_values[0];
 }
 
-double BinomialTree::price(double S, double K, double r, double sigma, double T, double q, OptionType type, int steps, BinomialWorkspace& workspace) {
+double BinomialTree::priceParametersWorkspace(double S, double K, double r, double sigma, double T, double q,
+                                              OptionType type, int steps, BinomialWorkspace &workspace) {
     auto& prices = workspace.prices;
     auto& option_values = workspace.optionValues;
 
@@ -117,13 +118,13 @@ Greeks BinomialTree::computeGreeks(const Option& opt, BinomialWorkspace& workspa
                                           double dS, double dT,
                                           double dSigma, double dR) {
     Option opt_up = opt; opt_up.S += dS;
-    double price_up = price(opt_up, steps, workspace);
+    double price_up = priceWorkspace(opt_up, steps, workspace);
 
     Option opt_down = opt; opt_down.S -= dS;
-    double price_down = price(opt_down, steps, workspace);
+    double price_down = priceWorkspace(opt_down, steps, workspace);
 
     Option opt_mid = opt;
-    double price_mid = price(opt_mid, steps, workspace);
+    double price_mid = priceWorkspace(opt_mid, steps, workspace);
 
     // Delta & Gamma
     double delta = (price_up - price_down) / (2 * dS);
@@ -131,17 +132,17 @@ Greeks BinomialTree::computeGreeks(const Option& opt, BinomialWorkspace& workspa
 
     // Theta
     Option opt_early = opt; opt_early.T = std::max(opt.T - dT, 1e-8);
-    double price_early = price(opt_early, steps, workspace);
+    double price_early = priceWorkspace(opt_early, steps, workspace);
     double theta = (price_early - price_mid) / dT;
 
     // Vega
     Option opt_vol = opt; opt_vol.sigma += dSigma;
-    double price_vol = price(opt_vol, steps, workspace);
+    double price_vol = priceWorkspace(opt_vol, steps, workspace);
     double vega = (price_vol - price_mid) / dSigma;
 
     // Rho
     Option opt_r = opt; opt_r.r += dR;
-    double price_r = price(opt_r, steps, workspace);
+    double price_r = priceWorkspace(opt_r, steps, workspace);
     double rho = (price_r - price_mid) / dR;
 
     return { delta, gamma, theta, vega, rho };

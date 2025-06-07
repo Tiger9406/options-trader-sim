@@ -17,7 +17,7 @@ double BlackScholes::price(const Option& opt){
     else
         return normCDF(-d2)*opt.K*exp(-opt.r*opt.T)-normCDF(-d1)*opt.S * std::exp(-opt.q*opt.T);
 }
-double BlackScholes::price(double S, double K, double r, double sigma, double T, double q, OptionType type){
+double BlackScholes::priceParameter(double S, double K, double r, double sigma, double T, double q, OptionType type){
     double d1 = (std::log(S/K)+(r+sigma*sigma/2)*T)/(sigma*std::sqrt(T));
     double d2 = d1-sigma*std::sqrt(T);
 

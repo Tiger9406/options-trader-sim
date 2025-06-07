@@ -14,7 +14,7 @@
 namespace BlackScholes{
     double price(const Option& opt);
     //overloaded to accept SoA
-    double price(double S, double K, double r, double sigma, double T, double q, OptionType type);
+    double priceParameter(double S, double K, double r, double sigma, double T, double q, OptionType type);
     double delta(const Option& opt);
     double gamma(const Option& opt);
     double vega(const Option& opt);

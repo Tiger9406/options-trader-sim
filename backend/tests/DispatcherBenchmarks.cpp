@@ -11,6 +11,7 @@
 #include <iostream>
 #include <vector>
 
+//one by one, no parallelization
 void benchmarkDispatcherSeparateStyle(int numEuropean, int numAmerican) {
     std::vector<Option> europeanOptions = generateOptions(numEuropean, OptionStyle::European);
     std::vector<Option> americanOptions = generateOptions(numAmerican, OptionStyle::American);
@@ -24,7 +25,6 @@ void benchmarkDispatcherSeparateStyle(int numEuropean, int numAmerican) {
         return applyAndSum(americanOptions, PricingDispatcher::price);
     });
 }
-
 void benchmarkDispatcherMixedStyle(int numEuropean, int numAmerican) {
     std::vector<Option> mixedOptions = generateMixedOptions(numEuropean, numAmerican);
 
@@ -33,20 +33,23 @@ void benchmarkDispatcherMixedStyle(int numEuropean, int numAmerican) {
     });
 }
 
-void benchmarkParallelization(int numEuropean, int numAmerican) {
-    std::vector<Option> allOptions = generateMixedOptions(numEuropean, numAmerican);
+//parallelization
+std::vector<double> benchmarkParallelization(AmericanPricerFn americanPricer, int numEuropean, int numAmerican, std::vector<Option> allOptions) {
+    if(allOptions.empty()) allOptions = generateMixedOptions(numEuropean, numAmerican);
     auto start = std::chrono::high_resolution_clock::now();
-    auto prices = PricingDispatcher::priceParallelized(allOptions);
+    auto prices = PricingDispatcher::priceParallelized(allOptions, americanPricer);
     auto end = std::chrono::high_resolution_clock::now();
     double totalTime = std::chrono::duration<double, std::milli>(end - start).count();
     std::cout << "Total Time (Parallelized Dispatcher): " << totalTime << " ms\n";
+    return prices;
 }
 
+//Individual method benchmarks, still via dispatcher
 void benchmarkBlackScholesSIMD(int numEuropean) {
     std::vector<Option> europeanOptions = generateOptions(numEuropean, OptionStyle::European);
     auto batch = toBatch(europeanOptions);
     auto start = std::chrono::high_resolution_clock::now();
-    auto prices = PricingDispatcher::priceBatchSIMD(batch);
+    auto prices = PricingDispatcher::priceBatchBlackScholesSIMD(batch);
     auto end = std::chrono::high_resolution_clock::now();
     double totalTime = std::chrono::duration<double, std::milli>(end - start).count();
     std::cout << "Total Time (Black-Scholes SIMD): " << totalTime << " ms\n";
