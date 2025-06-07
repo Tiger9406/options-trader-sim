@@ -101,5 +101,5 @@ double BAW::price(const Option& opt, int steps) {
         amer = (S > Sx) ? euro + A1 * std::pow(S / Sx, q1) : std::max(0.0, K - S);
     }
 
-    return std::max(amer, euro);
+    return amer;
 }

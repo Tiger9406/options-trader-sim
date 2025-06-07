@@ -64,7 +64,7 @@ void summarizePricingErrors(const std::vector<double>& binomialPrices,
 
     // Sort and display top offenders
     std::sort(fullErrors.begin(), fullErrors.end(), [](const auto& a, const auto& b) {
-        return a.absErr > b.absErr;
+        return a.relErr > b.relErr;
     });
 
     std::cout << "\nWorst Offenders (Top 10 by Absolute Error):\n";
