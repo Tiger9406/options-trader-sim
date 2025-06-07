@@ -10,13 +10,13 @@
 
 
 struct OptionBatch{
-    std::vector<double> S, K, r, sigma, T;
+    std::vector<double> S, K, r, sigma, T, q;
     std::vector<OptionType> type;
     std::vector<OptionStyle> style;
     //structure of arrays SoA; easier manipulation w/ SIMD
     void reserve(const size_t N){
         S.reserve(N); K.reserve(N); r.reserve(N);
-        sigma.reserve(N); T.reserve(N); type.reserve(N);
+        sigma.reserve(N); T.reserve(N); q.reserve(N); type.reserve(N);
         style.reserve(N);
     }
     void push_back(const Option& opt){
@@ -25,6 +25,7 @@ struct OptionBatch{
         r.push_back(opt.r);
         sigma.push_back(opt.sigma);
         T.push_back(opt.T);
+        q.push_back(opt.q);
         type.push_back(opt.type);
         style.push_back(opt.style);
     }

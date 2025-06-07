@@ -53,9 +53,9 @@ std::vector<double> PricingDispatcher::priceBatch(const OptionBatch& batch, int 
     #pragma omp for
         for (int i = 0; i < N; ++i) {
             if (batch.style[i] == OptionStyle::European)
-                prices[i] = BlackScholes::price(batch.S[i], batch.K[i], batch.r[i], batch.sigma[i], batch.T[i], batch.type[i]);
+                prices[i] = BlackScholes::price(batch.S[i], batch.K[i], batch.r[i], batch.sigma[i], batch.T[i], batch.q[i], batch.type[i]);
             else
-                prices[i] = BinomialTree::price(batch.S[i], batch.K[i], batch.r[i], batch.sigma[i], batch.T[i], batch.type[i], steps, workspace);
+                prices[i] = BinomialTree::price(batch.S[i], batch.K[i], batch.r[i], batch.sigma[i], batch.T[i], batch.q[i], batch.type[i], steps, workspace);
         }
     }
     return prices;
@@ -87,7 +87,7 @@ std::vector<double> PricingDispatcher::priceBatchBinomialWorkspace(const std::ve
     {
         BinomialWorkspace workspace(steps); // Thread-local
         #pragma omp for
-        for (int i = 0; i < static_cast<int>(opts.size()); ++i) {
+        for (int i = 0; i < static_cast<int>(opts.size()); i++) {
             prices[i] = BinomialTree::price(opts[i], steps, workspace);
         }
     }

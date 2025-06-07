@@ -41,6 +41,7 @@ public:
     std::uniform_real_distribution<double> rate{0.01, 0.05};
     std::uniform_real_distribution<double> vol{0.05, 0.3};
     std::uniform_real_distribution<double> expiry{0.1, 2.0};
+    std::uniform_real_distribution<double> div_yield{0.0, 0.04};
     std::bernoulli_distribution callPut{0.5};
 
     RandomGenerator() : gen(std::random_device{}()) {}
@@ -52,6 +53,7 @@ public:
                 rate(gen),
                 vol(gen),
                 expiry(gen),
+                div_yield(gen),
                 callPut(gen) ? Call : Put
         );
     }
@@ -62,8 +64,8 @@ inline std::vector<Option> generateOptions(int count, OptionStyle style) {
     std::vector<Option> options;
     options.reserve(count);
     for (int i = 0; i < count; i++) {
-        auto [S, K, r, sigma, T, type] = rng.generateOptionParams();
-        options.emplace_back(S, K, r, sigma, T, type, style);
+        auto [S, K, r, sigma, T, q, type] = rng.generateOptionParams();
+        options.emplace_back(S, K, r, sigma, T, q, type, style);
     }
     return options;
 }
@@ -79,8 +81,8 @@ inline std::vector<Option> generateMixedOptions(int european, int american) {
     std::shuffle(styles.begin(), styles.end(), rng.gen);
 
     for (OptionStyle style : styles) {
-        auto [S, K, r, sigma, T, type] = rng.generateOptionParams();
-        options.emplace_back(S, K, r, sigma, T, type, style);
+        auto [S, K, r, sigma, T, q, type] = rng.generateOptionParams();
+        options.emplace_back(S, K, r, sigma, T, q, type, style);
     }
 
     return options;

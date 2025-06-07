@@ -11,92 +11,16 @@
 #include "./shared/Option.h"
 #include "./shared/Greeks.h"
 
-class BlackScholes{
-public:
-    static double price(const Option& opt){
-        //assumes Brownian motion: develops randomly w/ constant volatility & constant drift rate/expected return
-        //Z score describing how profitable option s
-        double d1 = (std::log(opt.S/opt.K)+(opt.r+opt.sigma*opt.sigma/2)*opt.T)/(opt.sigma*std::sqrt(opt.T));
-        //Z score describing probability option to be executed
-        double d2 = d1-opt.sigma*std::sqrt(opt.T);
-
-        //dependent on option type
-        if(opt.type == OptionType::Call) //call option price = CDF(d1)*spot_price - CDF(d2)*exercise_price*e^(-interest_rate*time_expiry)
-            return normCDF(d1)*opt.S-normCDF(d2)*opt.K*exp(-opt.r*opt.T);
-        else
-            return normCDF(-d2)*opt.K*exp(-opt.r*opt.T)-normCDF(-d1)*opt.S;
-    }
+namespace BlackScholes{
+    double price(const Option& opt);
     //overloaded to accept SoA
-    static double price(double S, double K, double r, double sigma, double T, OptionType type){
-        double d1 = (std::log(S/K)+(r+sigma*sigma/2)*T)/(sigma*std::sqrt(T));
-        double d2 = d1-sigma*std::sqrt(T);
-
-        if(type == OptionType::Call)
-            return normCDF(d1)*S-normCDF(d2)*K*exp(-r*T);
-        else
-            return normCDF(-d2)*K*exp(-r*T)-normCDF(-d1)*S;
-    }
-    static double delta(const Option& opt){
-        double d1 = (std::log(opt.S / opt.K) + (opt.r + 0.5 * opt.sigma * opt.sigma) * opt.T) / (opt.sigma * sqrt(opt.T));
-        return opt.type == Call ? normCDF(d1) : normCDF(d1) - 1.0;
-    }
-    static double gamma(const Option& opt){
-        double d1 = (std::log(opt.S / opt.K) + (opt.r + 0.5 * opt.sigma * opt.sigma) * opt.T) / (opt.sigma * std::sqrt(opt.T));
-        return normPDF(d1) / (opt.S * opt.sigma * std::sqrt(opt.T));
-    }
-    static double vega(const Option& opt){
-        double d1 = (std::log(opt.S / opt.K) + (opt.r + 0.5 * opt.sigma * opt.sigma) * opt.T) / (opt.sigma * sqrt(opt.T));
-        return opt.S * normPDF(d1) * std::sqrt(opt.T) / 100.0;  // per 1% vol change
-    }
-    static double theta(const Option& opt){
-        double d1 = (std::log(opt.S / opt.K) + (opt.r + 0.5 * opt.sigma * opt.sigma) * opt.T) / (opt.sigma * std::sqrt(opt.T));
-        double d2 = d1 - opt.sigma * std::sqrt(opt.T);
-        double term1 = -(opt.S * normPDF(d1) * opt.sigma) / (2 * std::sqrt(opt.T));
-
-        if (opt.type == Call)
-            return (term1 - opt.r * opt.K * std::exp(-opt.r * opt.T) * normCDF(d2)) / 365.0;
-        else
-            return (term1 + opt.r * opt.K * std::exp(-opt.r * opt.T) * normCDF(-d2)) / 365.0;
-    }
-    static double rho(const Option& opt){
-        double d2 = (std::log(opt.S / opt.K) + (opt.r - 0.5 * opt.sigma * opt.sigma) * opt.T) / (opt.sigma * std::sqrt(opt.T));
-        if (opt.type == Call)
-            return opt.K * opt.T * std::exp(-opt.r * opt.T) * normCDF(d2) / 100.0;
-        else
-            return -opt.K * opt.T * std::exp(-opt.r * opt.T) * normCDF(-d2) / 100.0;
-    }
-    static Greeks computeGreeks(const Option& opt) {
-        double sqrtT = std::sqrt(opt.T);
-        double d1 = (std::log(opt.S / opt.K) + (opt.r + 0.5 * opt.sigma * opt.sigma) * opt.T) / (opt.sigma * sqrtT);
-        double d2 = d1 - opt.sigma * sqrtT;
-
-        double norm_pdf_d1 = normPDF(d1);
-        double norm_cdf_d1 = normCDF(d1);
-        double norm_cdf_d2 = normCDF(d2);
-        double norm_cdf_neg_d2 = 1.0 - norm_cdf_d2;
-        double discount = std::exp(-opt.r * opt.T);
-
-        bool isCall = (opt.type == Call);
-
-        // Delta
-        double delta = isCall ? norm_cdf_d1 : norm_cdf_d1 - 1.0;
-
-        // Gamma (same for call and put)
-        double gamma = norm_pdf_d1 / (opt.S * opt.sigma * sqrtT);
-
-        // Vega (same for call and put)
-        double vega = opt.S * norm_pdf_d1 * sqrtT / 100.0;
-
-        // Theta
-        double term1 = -(opt.S * norm_pdf_d1 * opt.sigma) / (2.0 * sqrtT);
-        double term2 = opt.r * opt.K * discount * (isCall ? norm_cdf_d2 : norm_cdf_neg_d2);
-        double theta = (term1 + (isCall ? -term2 : term2)) / 365.0;
-
-        // Rho
-        double rho = (opt.K * opt.T * discount * (isCall ? norm_cdf_d2 : -norm_cdf_neg_d2)) / 100.0;
-
-        return { delta, gamma, theta, vega, rho };
-    }
+    double price(double S, double K, double r, double sigma, double T, double q, OptionType type);
+    double delta(const Option& opt);
+    double gamma(const Option& opt);
+    double vega(const Option& opt);
+    double theta(const Option& opt);
+    double rho(const Option& opt);
+    Greeks computeGreeks(const Option& opt);
 };
 
 

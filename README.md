@@ -33,6 +33,7 @@ and will later include a frontend UI (React) and full portfolio/trading manageme
 
 ### In Progress:
 - American options speedup: BAW and Ju-Zhong Models
+- Include consideration of dividend yield in Option & models
 
 ### Planned:
 - Look into saving previously calculated Binomial Tree Prices,

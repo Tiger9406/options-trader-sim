@@ -6,7 +6,7 @@ int main() {
 
 //    benchmarkDispatcherSeparateStyle(NUM_EUROPEAN, NUM_AMERICAN);
 //    benchmarkDispatcherMixedStyle(NUM_EUROPEAN, NUM_AMERICAN);
-    benchmarkParallelization(NUM_EUROPEAN, 0);
+    benchmarkParallelization(0, NUM_AMERICAN);
     benchmarkBlackScholesSIMD(NUM_EUROPEAN);
 
     return 0;

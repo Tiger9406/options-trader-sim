@@ -8,13 +8,13 @@
 #include "./OptionEnums.h"
 
 struct Option{
-    double S, K, r, sigma, T;
+    double S, K, r, sigma, T, q;
     OptionType type;
     OptionStyle style;
 
-    Option(double S_, double K_, double r_, double sigma_, double T_,
+    Option(double S_, double K_, double r_, double sigma_, double T_, double q_,
            OptionType type_, OptionStyle style_)
-            : S(S_), K(K_), r(r_), sigma(sigma_), T(T_),
+            : S(S_), K(K_), r(r_), sigma(sigma_), T(T_), q(q_),
               type(type_), style(style_) {}
 };
 

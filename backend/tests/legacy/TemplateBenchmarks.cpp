@@ -16,7 +16,7 @@ void benchmarkVirtualBlackScholes(int numOptions) {
     std::vector<std::unique_ptr<OptionClass>> options;
     RandomGenerator rng;
     for (int i = 0; i < numOptions; ++i) {
-        auto [S, K, r, sigma, T, type] = rng.generateOptionParams();
+        auto [S, K, r, sigma, T, q, type] = rng.generateOptionParams();
         options.emplace_back(std::make_unique<EuropeanOptionInheritance>(S, K, r, sigma, T, type));
     }
 
@@ -35,7 +35,7 @@ void benchmarkGenericBlackScholesTemplate(int numOptions) {
     std::vector<EuropeanOption> options;
     RandomGenerator rng;
     for (int i = 0; i < numOptions; ++i) {
-        auto [S, K, r, sigma, T, type] = rng.generateOptionParams();
+        auto [S, K, r, sigma, T, q, type] = rng.generateOptionParams();
         options.emplace_back(S, K, r, sigma, T, type);
     }
 
@@ -55,7 +55,7 @@ void benchmarkSeparatedBlackScholes(int numOptions) {
     std::vector<EuropeanPutOption> puts;
     RandomGenerator rng;
     for (int i = 0; i < numOptions; ++i) {
-        auto [S, K, r, sigma, T, type] = rng.generateOptionParams();
+        auto [S, K, r, sigma, T, q, type] = rng.generateOptionParams();
         if (type == Call) calls.emplace_back(S, K, r, sigma, T);
         else puts.emplace_back(S, K, r, sigma, T);
     }
@@ -71,7 +71,7 @@ void benchmarkGenericBinomialTreeTemplate(int numOptions, int steps) {
     std::vector<AmericanOption> options;
     RandomGenerator rng;
     for (int i = 0; i < numOptions; ++i) {
-        auto [S, K, r, sigma, T, type] = rng.generateOptionParams();
+        auto [S, K, r, sigma, T, q, type] = rng.generateOptionParams();
         options.emplace_back(S, K, r, sigma, T, type);
     }
 
@@ -88,7 +88,7 @@ void benchmarkSeparatedBinomialTree(int numOptions, int steps) {
     std::vector<AmericanPutOption> puts;
     RandomGenerator rng;
     for (int i = 0; i < numOptions; ++i) {
-        auto [S, K, r, sigma, T, type] = rng.generateOptionParams();
+        auto [S, K, r, sigma, T, q, type] = rng.generateOptionParams();
         if (type == Call) calls.emplace_back(S, K, r, sigma, T);
         else puts.emplace_back(S, K, r, sigma, T);
     }

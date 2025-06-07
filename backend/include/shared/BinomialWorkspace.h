@@ -6,6 +6,7 @@
 #define OPTIONS_SIMULATOR_BINOMIALWORKSPACE_H
 
 #include <vector>
+#include <cstddef>
 //create once so don't have to reallocate space for every option
 struct BinomialWorkspace {
     std::vector<double> prices;
