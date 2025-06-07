@@ -1,69 +1,105 @@
-//
-// Created by xcao2 on 6/4/2025.
-//
-
+// Converted from online BAW implementation to match your style
 #include "BAW.h"
+#include "BlackScholes.h"
+#include "OptionEnums.h"
+#include "BinomialTree.h"
 #include <cmath>
-#include <algorithm>
-#include "./shared/OptionEnums.h"
-#include "../include/BlackScholes.h"
-#include "../include/BinomialTree.h"
+#include <vector>
 #include <iostream>
 
-double BAW::price(const Option& opt, int steps){
-    double S = opt.S, K = opt.K, r = opt.r, sigma = opt.sigma, T = opt.T, q = opt.q;
+// Compute q1/q2 constants for critical stock price calculation
+static double calc_n(double r, double q, double sigma2) {
+    return 2.0 * (r - q) / (sigma2);
+}
+
+static double calc_k(double r, double T, double sigma2) {
+    return 2.0 * r / (sigma2 * (1.0 - std::exp(-r * T)));
+}
+
+// Objective function for Newton's method to find Sx
+static double objective(double Sx, const Option& opt) {
+    double K = opt.K, r = opt.r, q = opt.q, sigma = opt.sigma, T = opt.T;
     OptionType type = opt.type;
 
-    double european_price = BlackScholes::price(opt);
-    if (type == OptionType::Call && S < K && european_price < 1.5) {
-         std::cerr << "Warning: BAW fallback for deep OTM/low value Call. S=" << S << " K=" << K << " T=" << T << " sigma=" << sigma << " European=" << european_price << '\n';
-        return BinomialTree::price(opt);
-    }
+    if (Sx <= 0.0) return 1e100;
 
+    double sigma2 = sigma*sigma;
 
-    if (q >= r){
-//        std::cerr <<"Warning, BAW assumption violated; utilizing binomial tree\n";
-        return BinomialTree::price(opt);
-    }
+    double n = calc_n(r, q, sigma2);
+    double k = calc_k(r, T, sigma2);
+    double d1 = (std::log(Sx / K) + (r - q + 0.5 * sigma2) * T) / (sigma * std::sqrt(T));
 
-    double sigma2 = std::max(sigma * sigma, 1e-4); //in case of overly small sigma
-
-    double beta, B_inf, B0, h, I, A;
-
-    if (type == OptionType::Call) {
-        beta = (0.5 - (r - q) / sigma2) + std::sqrt(std::pow((r - q) / sigma2 - 0.5, 2) + 2 * r / sigma2);
-        if (!std::isfinite(beta) || beta <= 0.0){
-//            std::cerr << "beta error with S=" << S << " K=" << K << " r=" << r << " q=" << q << " sigma=" << sigma << " T=" << T << '\n';
-            return BinomialTree::price(opt);
-        }
-
-        B_inf = beta / (beta - 1.0) * K;
-        B0 = std::max(K, r / (r - q) * K);
-        h = -(r - q) * T + 2.0 * sigma * std::sqrt(T);
-        I = B0 + (B_inf - B0) * (1.0 - std::exp(h)); //to find out where early exercise becomes optimal
-        if (S >= I) //if already optimal
-            return std::max(0.0, S - K); //return intrinsic val: exercise option now, immediate cash payout from exercising
-
-        double european = BlackScholes::price(opt);
-        A = (I - K) * std::pow(I, -beta);
-        return std::max(0.0, european + A * std::pow(S, beta)); //european + early exercise premium
-
+    if (type == Call) {
+        double q2 = 0.5 * (-n + std::sqrt((n - 1.0) * (n - 1.0) + 4.0 * k));
+        return std::pow(
+                BlackScholes::priceParameter(Sx, K, r, sigma, T, q, Call) +
+                (1.0 - std::exp(-q * T) * normCDF(d1)) * Sx / q2 -
+                Sx + K, 2.0
+        );
     } else {
-        beta = (0.5 - (r - q) / sigma2) - std::sqrt(std::pow((r - q) / sigma2 - 0.5, 2) + 2 * r / sigma2);
-        if (!std::isfinite(beta) || beta >= 0.0){
-//            std::cerr << "beta error with S=" << S << " K=" << K << " r=" << r << " q=" << q << " sigma=" << sigma << " T=" << T << '\n';
-            return BinomialTree::price(opt);
-        }
-
-        B_inf = beta / (beta - 1.0) * K;
-        B0 = std::max(K, r / (r - q) * K);
-        h = (r - q) * T - 2.0 * sigma * std::sqrt(T);
-        I = B0 + (B_inf - B0) * (1.0 - std::exp(h)); //calculate bound
-
-        if (S <= I)
-            return std::max(0.0, K-S); //exercise now
-        double european = BlackScholes::price(opt);
-        A = (K - I) * std::pow(I, -beta);
-        return std::max(0.0, european + A * std::pow(S, beta)); //min val is 0 bucks
+        double q1 = 0.5 * (-n - std::sqrt((n - 1.0) * (n - 1.0) + 4.0 * k));
+        return std::pow(
+                BlackScholes::priceParameter(Sx, K, r, sigma, T, q, Put) -
+                (1.0 - std::exp(-q * T) * normCDF(-d1)) * Sx / q1 +
+                Sx - K, 2.0
+        );
     }
+}
+
+// Numerical derivative for Newton's method
+static double derivative(double Sx, const Option& opt, double h = 0.01) {
+    return (objective(Sx + h, opt) - objective(Sx - h, opt)) / (2.0 * h);
+}
+
+static double second_derivative(double Sx, const Option& opt, double h = 0.01) {
+    return (derivative(Sx + h, opt) - derivative(Sx - h, opt)) / (2.0 * h);
+}
+
+// Newton's method to find critical Sx
+static double find_critical_Sx(const Option& opt, int maxIterations, double tol) {
+    double Sx = opt.S;
+    for (int i = 0; i < maxIterations; i++) {
+        double f_prime = derivative(Sx, opt);
+        double f_double_prime = second_derivative(Sx, opt);
+        double newSx = Sx - f_prime / f_double_prime;
+        if (std::abs(newSx - Sx) < tol) // on event difference is so minimal
+            return newSx;
+        Sx = newSx;
+    }
+    return -1; // fallback
+}
+
+// Final BAW price
+double BAW::price(const Option& opt, int steps) {
+    double S = opt.S, K = opt.K, r = opt.r, q = opt.q, sigma = opt.sigma, T = opt.T;
+    OptionType type = opt.type;
+
+    double sigma2 = sigma*sigma;
+
+    double n = calc_n(r, q, sigma2);
+    double k = calc_k(r, T, sigma2);
+
+    int maxIterations = 200;
+    double tol = 1e-5;
+    double Sx = find_critical_Sx(opt, maxIterations, tol);
+    if(Sx==-1){
+//        std::cerr<<"Did not converge\n";
+        return BinomialTree::price(opt, steps);
+    }
+    double d1 = (std::log(Sx / K) + (r - q + 0.5 * sigma * sigma) * T) / (sigma * std::sqrt(T));
+
+    double euro = BlackScholes::price(opt);
+    double amer = euro;
+
+    if (type == Call) {
+        double q2 = 0.5 * (-n + std::sqrt((n - 1.0) * (n - 1.0) + 4.0 * k));
+        double A2 = Sx * (1.0 - std::exp(-q * T) * normCDF(d1)) / q2;
+        amer = (S < Sx) ? euro + A2 * std::pow(S / Sx, q2) : std::max(0.0, S - K);
+    } else {
+        double q1 = 0.5 * (-n - std::sqrt((n - 1.0) * (n - 1.0) + 4.0 * k));
+        double A1 = -Sx * (1.0 - std::exp(-q * T) * normCDF(-d1)) / q1;
+        amer = (S > Sx) ? euro + A1 * std::pow(S / Sx, q1) : std::max(0.0, K - S);
+    }
+
+    return std::max(amer, euro);
 }

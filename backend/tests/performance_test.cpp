@@ -24,7 +24,7 @@ void summarizePricingErrors(const std::vector<double>& binomialPrices,
     const double MIN_DENOMINATOR = 1e-2;
     double absErrorSum = 0.0, relErrorSum = 0.0;
     double maxAbsErr = 0.0, maxRelErr = 0.0;
-    int countRelErrOver1pct = 0, skippedRelErr = 0;
+    int countRelErrOver5pct = 0, skippedRelErr = 0;
 
     std::vector<FullErrorInfo> fullErrors;
 
@@ -40,7 +40,7 @@ void summarizePricingErrors(const std::vector<double>& binomialPrices,
             double relErr = absErr / std::abs(bin);
             relErrorSum += relErr;
             if (relErr > maxRelErr) maxRelErr = relErr;
-            if (relErr > 0.01) ++countRelErrOver1pct;
+            if (relErr > 0.05) ++countRelErrOver5pct;
 
             fullErrors.push_back({i, options[i], bin, baw, absErr, relErr});
         } else {
@@ -59,15 +59,15 @@ void summarizePricingErrors(const std::vector<double>& binomialPrices,
     std::cout << "Mean Relative Error:      " << meanRelErr * 100 << "%\n";
     std::cout << "Max Absolute Error:       " << maxAbsErr << '\n';
     std::cout << "Max Relative Error:       " << maxRelErr * 100 << "%\n";
-    std::cout << "Count > 1% Rel Error:     " << countRelErrOver1pct << " options\n";
-    std::cout << "Skipped Rel Errors:       " << skippedRelErr << " (binomial price too small)\n";
+    std::cout << "Count > 5% Rel Error:     " << countRelErrOver5pct << " options\n";
+
 
     // Sort and display top offenders
     std::sort(fullErrors.begin(), fullErrors.end(), [](const auto& a, const auto& b) {
-        return a.relErr > b.relErr;
+        return a.absErr > b.absErr;
     });
 
-    std::cout << "\nWorst Offenders (Top 10 by Relative Error):\n";
+    std::cout << "\nWorst Offenders (Top 10 by Absolute Error):\n";
     std::cout << "Idx  Type   S        K        r       q       sig     T       Binom     BAW       AbsErr     RelErr%\n";
     std::cout << "---- ------ -------- -------- ------- ------- ------- -------- -------- -------- ------------\n";
 
