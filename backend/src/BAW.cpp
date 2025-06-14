@@ -26,7 +26,7 @@ static double objective(double Sx, double S, double K, double r, double q, doubl
     double k = calc_k(r, T, sigma2);
     double d1 = (std::log(Sx / K) + (r - q + 0.5 * sigma2) * T) / (sigma * std::sqrt(T));
 
-    if (type == Call) {
+    if (type == OptionType::Call) {
         double q2 = 0.5 * (-n + std::sqrt((n - 1.0) * (n - 1.0) + 4.0 * k));
         return std::pow(
                 BlackScholes::priceParameter(Sx, K, r, sigma, T, q, Call) +
@@ -90,7 +90,7 @@ double BAW::price(const Option& opt, int steps) {
     double euro = BlackScholes::price(opt);
     double amer = euro;
 
-    if (type == Call) {
+    if (type == OptionType::Call) {
         double q2 = 0.5 * (-n + std::sqrt((n - 1.0) * (n - 1.0) + 4.0 * k));
         double A2 = Sx * (1.0 - std::exp(-q * T) * normCDF(d1)) / q2;
         amer = (S < Sx) ? euro + A2 * std::pow(S / Sx, q2) : std::max(0.0, S - K);
@@ -121,7 +121,7 @@ double BAW::priceParameters(double S, double K, double r, double sigma, double T
     double euro = BlackScholes::priceParameter(S, K, r, sigma, T, q, type);
     double amer = euro;
 
-    if (type == Call) {
+    if (type == OptionType::Call) {
         double q2 = 0.5 * (-n + std::sqrt((n - 1.0) * (n - 1.0) + 4.0 * k));
         double A2 = Sx * (1.0 - std::exp(-q * T) * normCDF(d1)) / q2;
         amer = (S < Sx) ? euro + A2 * std::pow(S / Sx, q2) : std::max(0.0, S - K);

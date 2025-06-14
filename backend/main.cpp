@@ -2,9 +2,9 @@
 #include <iostream>
 #include <thread>
 #include "MarketDataFeed.h"
-#include "include/shared/OptionBatch.h"
-#include "include/PricingDispatcher.h"
-#include "tests/BenchmarkUtils.h"
+#include "OptionBatch.h"
+#include "PricingDispatcher.h"
+#include "BenchmarkUtils.h"
 
 int main() {
     constexpr size_t NUM_EUROPEAN = 500000;
@@ -17,6 +17,7 @@ int main() {
     batch.reserve(NUM_American+NUM_EUROPEAN);
 
     // random option batch through testing util
+    //should just move the 24 bytes control block
     std::vector<Option> options = generateMixedOptions(NUM_EUROPEAN, NUM_American);
     batch = toBatch(options);
 
@@ -35,7 +36,6 @@ int main() {
             batch.sigma[i] = std::max(0.01, batch.sigma[i] + 0.01 * noise(gen));
             batch.T[i] = std::max(1e-6, batch.T[i] - dt);
         }
-
         auto prices = PricingDispatcher::priceBatch(batch, 1000);
         std::cout << "Tick: " << prices[0] << " ... " << prices[prices.size() - 1] << std::endl;
     };

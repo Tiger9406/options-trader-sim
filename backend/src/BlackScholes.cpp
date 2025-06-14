@@ -2,7 +2,7 @@
 // Created by xcao2 on 6/4/2025.
 //
 
-#include "../include/BlackScholes.h"
+#include "BlackScholes.h"
 
 double BlackScholes::price(const Option& opt){
     //assumes Brownian motion: develops randomly w/ constant volatility & constant drift rate/expected return

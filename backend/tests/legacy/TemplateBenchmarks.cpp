@@ -3,7 +3,7 @@
 //
 
 #include "TemplateBenchmarks.h"
-#include "../BenchmarkUtils.h"
+#include "BenchmarkUtils.h"
 #include "legacy/EuropeanOption.h"
 #include "legacy/AmericanOption.h"
 #include "legacy/OptionClass.h"

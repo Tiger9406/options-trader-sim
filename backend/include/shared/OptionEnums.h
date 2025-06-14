@@ -5,7 +5,7 @@
 #ifndef OPTIONS_SIMULATOR_OPTIONENUMS_H
 #define OPTIONS_SIMULATOR_OPTIONENUMS_H
 
-enum OptionType { Call, Put };
-enum class OptionStyle {European, American};
+enum OptionType : bool { Call, Put };
+enum OptionStyle : bool {European, American};
 
 #endif //OPTIONS_SIMULATOR_OPTIONENUMS_H

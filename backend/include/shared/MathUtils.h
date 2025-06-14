@@ -7,12 +7,12 @@
 
 #include <cmath>
 
-inline double normCDF(double x){
+inline double normCDF(double x) noexcept {
     //probability that random var following a normal distribution, <= given x
     return erfc(-x/sqrt(2))/2;
 }
 
-inline double normPDF(double x){
+inline double normPDF(double x) noexcept{
     return (1/sqrt(2*M_PI))*exp(-x*x/2);
 }
 

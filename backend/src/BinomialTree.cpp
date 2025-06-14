@@ -2,9 +2,9 @@
 // Created by xcao2 on 6/4/2025.
 //
 
-#include "../include/BinomialTree.h"
+#include "BinomialTree.h"
 #include <vector>
-#include "./shared/MathUtils.h"
+#include "MathUtils.h"
 
 double BinomialTree::price(const Option& opt, int steps) {
     double dt = opt.T / steps;
