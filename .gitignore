@@ -17,4 +17,4 @@ build.ninja
 *.exe
 *.out
 
-backend/apikey.txt
+backend/config/apikey.txt
