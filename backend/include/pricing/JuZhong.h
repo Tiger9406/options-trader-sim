@@ -5,8 +5,8 @@
 #ifndef OPTIONS_SIMULATOR_JUZHONG_H
 #define OPTIONS_SIMULATOR_JUZHONG_H
 
-#include "./shared/OptionEnums.h"
-#include "./shared/Option.h"
+#include "shared/OptionEnums.h"
+#include "shared/Option.h"
 
 namespace JuZhong {
     double price(const Option& opt, int steps = 1000);

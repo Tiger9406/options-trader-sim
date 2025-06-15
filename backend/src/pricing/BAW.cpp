@@ -1,8 +1,8 @@
 // Converted from online BAW implementation to match your style
-#include "BAW.h"
-#include "BlackScholes.h"
-#include "OptionEnums.h"
-#include "BinomialTree.h"
+#include "pricing/BAW.h"
+#include "pricing/BlackScholes.h"
+#include "shared/OptionEnums.h"
+#include "pricing/BinomialTree.h"
 #include <cmath>
 #include <vector>
 #include <iostream>

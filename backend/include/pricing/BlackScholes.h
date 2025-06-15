@@ -6,10 +6,10 @@
 #define OPTIONS_SIMULATOR_BLACKSCHOLES_H
 
 #include <cmath>
-#include "./shared/MathUtils.h"
-#include "./shared/OptionEnums.h"
-#include "./shared/Option.h"
-#include "./shared/Greeks.h"
+#include "shared/MathUtils.h"
+#include "shared/OptionEnums.h"
+#include "shared/Option.h"
+#include "shared/Greeks.h"
 
 namespace BlackScholes{
     double price(const Option& opt);

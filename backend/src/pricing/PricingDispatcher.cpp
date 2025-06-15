@@ -2,11 +2,11 @@
 // Created by xcao2 on 5/29/2025.
 //
 
-#include "PricingDispatcher.h"
-#include "BlackScholes.h"
-#include "BinomialTree.h"
-#include "BinomialWorkspace.h"
-#include "BAW.h"
+#include "pricing/PricingDispatcher.h"
+#include "pricing/BlackScholes.h"
+#include "pricing/BinomialTree.h"
+#include "shared/BinomialWorkspace.h"
+#include "pricing/BAW.h"
 #include <cmath>
 #include <stdexcept>
 #include <omp.h>

@@ -6,11 +6,11 @@
 #define OPTIONS_SIMULATOR_PRICINGDISPATCHER_H
 
 #include <vector>
-#include "./BinomialTree.h"
-#include "./BlackScholes.h"
-#include "./shared/Option.h"
-#include "./shared/BinomialWorkspace.h"
-#include "./shared/OptionBatch.h"
+#include "BinomialTree.h"
+#include "BlackScholes.h"
+#include "shared/Option.h"
+#include "shared/BinomialWorkspace.h"
+#include "shared/OptionBatch.h"
 using AmericanPricerFn = double(*)(const Option&, int);
 
 class PricingDispatcher {

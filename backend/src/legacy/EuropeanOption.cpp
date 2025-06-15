@@ -4,7 +4,7 @@
 
 #include "../../include/legacy/EuropeanOption.h"
 #include <cmath>
-#include "../shared/MathUtils.h"
+#include "shared/MathUtils.h"
 using namespace std;
 
 EuropeanOptionInheritance::EuropeanOptionInheritance(double S_, double K_, double r_, double sigma_, double T_, OptionType type_)

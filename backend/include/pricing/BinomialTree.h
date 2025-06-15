@@ -5,10 +5,10 @@
 #ifndef OPTIONS_SIMULATOR_BINOMIALTREE_H
 #define OPTIONS_SIMULATOR_BINOMIALTREE_H
 
-#include "./shared/OptionEnums.h"
-#include "./shared/BinomialWorkspace.h"
-#include "./shared/Greeks.h"
-#include "./shared/Option.h"
+#include "shared/OptionEnums.h"
+#include "shared/BinomialWorkspace.h"
+#include "shared/Greeks.h"
+#include "shared/Option.h"
 
 namespace BinomialTree {
     double price(const Option& opt, int steps = 1000);

@@ -5,8 +5,8 @@
 #ifndef OPTIONS_SIMULATOR_EUROPEANOPTION_H
 #define OPTIONS_SIMULATOR_EUROPEANOPTION_H
 
-#include "Option.h"
-#include "OptionEnums.h"
+#include "shared/Option.h"
+#include "shared/OptionEnums.h"
 #include "OptionClass.h"
 
 //opt to use this for simplicity

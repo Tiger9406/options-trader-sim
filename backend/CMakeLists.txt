@@ -14,19 +14,12 @@ find_package(Boost REQUIRED COMPONENTS system)
 
 file(GLOB_RECURSE SOURCES CONFIGURE_DEPENDS
         ${CMAKE_SOURCE_DIR}/src/*.cpp
-        ${CMAKE_SOURCE_DIR}/src/legacy/*.cpp
-)
-file(GLOB_RECURSE HEADERS CONFIGURE_DEPENDS
-        ${CMAKE_SOURCE_DIR}/include/*.h
-        ${CMAKE_SOURCE_DIR}/include/legacy/*.h
 )
 
 #create library
 add_library(core STATIC ${SOURCES})
 target_include_directories(core PUBLIC
-        ${CMAKE_SOURCE_DIR}/include
-        ${CMAKE_SOURCE_DIR}/include/shared
-        ${CMAKE_SOURCE_DIR}/include/legacy
+        ${CMAKE_SOURCE_DIR}/include/
 )
 target_link_libraries(core
         PUBLIC Boost::system
@@ -35,7 +28,7 @@ target_link_libraries(core
 )
 
 # Main Executable
-add_executable(options_simulator StaticMain.cpp)
+add_executable(options_simulator src/StaticMain.cpp)
 target_link_libraries(options_simulator PRIVATE core)
 
 add_subdirectory(tests)

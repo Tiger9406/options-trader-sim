@@ -4,7 +4,7 @@
 
 #ifndef OPTIONS_SIMULATOR_OPTIONCLASS_H
 #define OPTIONS_SIMULATOR_OPTIONCLASS_H
-#include "OptionEnums.h"
+#include "shared/OptionEnums.h"
 
 class OptionClass {
 protected:

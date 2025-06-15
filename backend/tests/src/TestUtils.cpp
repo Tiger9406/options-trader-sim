@@ -5,7 +5,7 @@
 #include <vector>
 #include <cmath>
 #include <iomanip>
-#include <stdio.h>
+#include <iostream>
 
 void summarizePricingErrors(const std::vector<double>& prices1,
                             const std::vector<double>& prices2,

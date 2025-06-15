@@ -5,7 +5,7 @@
 #ifndef OPTIONS_SIMULATOR_BAW_H
 #define OPTIONS_SIMULATOR_BAW_H
 
-#include "./shared/Option.h"
+#include "shared/Option.h"
 
 namespace BAW{
     double price(const Option& opt, int steps = 100);

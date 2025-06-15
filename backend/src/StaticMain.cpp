@@ -1,10 +1,10 @@
 #include <boost/asio.hpp>
 #include <iostream>
 #include <thread>
-#include "MarketDataFeed.h"
-#include "OptionBatch.h"
-#include "PricingDispatcher.h"
-#include "BenchmarkUtils.h"
+#include "legacy/MarketDataFeed.h"
+#include "shared/OptionBatch.h"
+#include "pricing/PricingDispatcher.h"
+#include "shared/BenchmarkUtils.h"
 
 int main() {
     constexpr size_t NUM_EUROPEAN = 500000;

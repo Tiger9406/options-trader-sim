@@ -2,8 +2,8 @@
 // Created by xcao2 on 6/1/2025.
 //
 
-#ifndef OPTIONS_SIMULATOR_DISPATCHERBENCHMARKS_H
-#define OPTIONS_SIMULATOR_DISPATCHERBENCHMARKS_H
+#ifndef PERFORMANCE_TEST_DISPATCHERBENCHMARKS_H
+#define PERFORMANCE_TEST_DISPATCHERBENCHMARKS_H
 
 #include "Option.h"
 #include <vector>
@@ -14,4 +14,4 @@ void benchmarkDispatcherMixedStyle(int numEuropean, int numAmerican);
 std::vector<double> benchmarkParallelization(AmericanPricerFn americanPricer, int numEuropean = 0, int numAmerican = 0, std::vector<Option> allOptions = {});
 void benchmarkBlackScholesSIMD(int numEuropean);
 
-#endif //OPTIONS_SIMULATOR_DISPATCHERBENCHMARKS_H
+#endif //PERFORMANCE_TEST_DISPATCHERBENCHMARKS_H
