@@ -35,10 +35,7 @@ target_link_libraries(core
 )
 
 # Main Executable
-add_executable(options_simulator main.cpp)
+add_executable(options_simulator StaticMain.cpp)
 target_link_libraries(options_simulator PRIVATE core)
 
-#Performance Test Executable
-file(GLOB_RECURSE TEST_SOURCES CONFIGURE_DEPENDS ${CMAKE_SOURCE_DIR}/tests/*.cpp)
-add_executable(performance_test ${TEST_SOURCES})
-target_link_libraries(performance_test PRIVATE core)
+add_subdirectory(tests)
