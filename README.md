@@ -67,6 +67,9 @@ cmake ..
 # Build with all cores
 make -j$(nproc)
 
+# if macbook
+make -j$(sysctl -n hw.logicalcpu)
+
 # Run the simulator
 ./options_simulator
 ```
@@ -78,6 +81,12 @@ Make sure you have the following dependencies installed:
 ```bash
 sudo apt update
 sudo apt install build-essential cmake libboost-all-dev
+```
+
+On Macbook:
+```bash
+brew upgrade
+brew install cmake boost
 ```
 
 This installs:

@@ -2,8 +2,8 @@
 // Created by xcao2 on 6/1/2025.
 //
 
-#include "TemplateBenchmarks.h"
-#include "BenchmarkUtils.h"
+#include "legacy/TemplateBenchmarks.h"
+#include "shared/BenchmarkUtils.h"
 #include "legacy/EuropeanOption.h"
 #include "legacy/AmericanOption.h"
 #include "legacy/OptionClass.h"

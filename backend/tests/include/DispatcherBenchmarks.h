@@ -5,7 +5,7 @@
 #ifndef PERFORMANCE_TEST_DISPATCHERBENCHMARKS_H
 #define PERFORMANCE_TEST_DISPATCHERBENCHMARKS_H
 
-#include "Option.h"
+#include "shared/Option.h"
 #include <vector>
 using AmericanPricerFn = double(*)(const Option&, int);
 

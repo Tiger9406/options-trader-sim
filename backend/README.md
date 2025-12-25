@@ -2,7 +2,7 @@
 
 A performance-oriented C++ backend for a full-fledged options trading application. This backend 
 currently simulates European options using the Black-Scholes model and American options using 
-Binomial Tree model.
+BAW Model.
 
 I hope to learn the mathematical reasoning behind options pricing, focusing on system design and financial realism.
 

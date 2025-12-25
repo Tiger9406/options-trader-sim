@@ -1,5 +1,6 @@
 # cmake stuff
 backend/cmake-build-debug/
+backend/build/
 CMakeFiles/
 CMakeCache.txt
 cmake_install.cmake
@@ -16,5 +17,8 @@ build.ninja
 *.so
 *.exe
 *.out
+.vscode/
+*/.cmake/
+
 
 backend/config/apikey.txt

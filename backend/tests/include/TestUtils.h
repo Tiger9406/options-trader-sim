@@ -6,7 +6,7 @@
 #define PERFORMANCE_TEST_TESTUTILS_H
 
 #include <vector>
-#include <Option.h>
+#include <shared/Option.h>
 
 void summarizePricingErrors(const std::vector<double>& prices1,
                             const std::vector<double>& prices2,

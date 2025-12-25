@@ -1,7 +1,7 @@
 #include "DispatcherBenchmarks.h"
-#include "BinomialTree.h"
-#include "BAW.h"
-#include "BenchmarkUtils.h"
+#include "pricing/BinomialTree.h"
+#include "pricing/BAW.h"
+#include "shared/BenchmarkUtils.h"
 
 
 

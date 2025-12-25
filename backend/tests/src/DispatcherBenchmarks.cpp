@@ -2,10 +2,10 @@
 // Created by xcao2 on 6/1/2025.
 //
 
-#include "../include/DispatcherBenchmarks.h"
-#include "BenchmarkUtils.h"
-#include "OptionBatch.h"
-#include "PricingDispatcher.h"
+#include "DispatcherBenchmarks.h"
+#include "shared/BenchmarkUtils.h"
+#include "shared/OptionBatch.h"
+#include "pricing/PricingDispatcher.h"
 
 #include <chrono>
 #include <iostream>
