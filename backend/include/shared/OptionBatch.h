@@ -34,13 +34,13 @@ struct OptionBatch{
     }
 };
 
-// Convert AoS -> SoA; only for European
+// Convert AoS -> SoA
 inline OptionBatch toBatch(const std::vector<Option>& options) {
     OptionBatch batch;
     batch.reserve(options.size());
 
     for (const auto& opt : options) {
-            batch.push_back(opt);
+        batch.push_back(opt);
     }
     return batch;
 }

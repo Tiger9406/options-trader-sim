@@ -14,7 +14,6 @@
 
 class MarketDataFeed {
 public:
-public:
     using Callback = std::function<void()>;
 
     MarketDataFeed(boost::asio::io_context& io, Callback onTick, int interval_ms);

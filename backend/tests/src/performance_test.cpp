@@ -3,9 +3,6 @@
 #include "pricing/BAW.h"
 #include "shared/BenchmarkUtils.h"
 
-
-
-
 int main() {
     constexpr int NUM_EUROPEAN = 1'000'000;
     constexpr int NUM_AMERICAN = 1'000'000;
