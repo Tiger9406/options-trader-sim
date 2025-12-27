@@ -4,6 +4,7 @@
 
 #include <string>
 #include "api/ApiKeyLoader.h"
+#include "api/Client.h"
 
 int main(){
     //use polygon api

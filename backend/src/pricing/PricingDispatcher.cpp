@@ -32,7 +32,7 @@ std::vector<double> PricingDispatcher::priceParallelized(const std::vector<Optio
     {
         //split up
         #pragma omp for
-        for (int i = 0; i < opts.size(); i++) {
+        for (size_t i = 0; i < opts.size(); i++) {
             if (opts[i].style == OptionStyle::European) {
                 prices[i] = BlackScholes::price(opts[i]);
             } else {
@@ -52,7 +52,7 @@ std::vector<double> PricingDispatcher::priceBatch(const OptionBatch& batch, int 
         BinomialWorkspace workspace(steps);  // per-thread workspace
 
     #pragma omp for
-        for (int i = 0; i < N; ++i) {
+        for (size_t i = 0; i < N; ++i) {
             if (batch.style[i] == OptionStyle::European)
                 prices[i] = BlackScholes::priceParameter(batch.S[i], batch.K[i], batch.r[i], batch.sigma[i], batch.T[i], batch.q[i], batch.type[i]);
             else
@@ -102,7 +102,7 @@ std::vector<GreekResult> PricingDispatcher::priceAndGreeks(const std::vector<Opt
     {
         BinomialWorkspace workspace(steps); //once per thread; no matter if european or american, there
         #pragma omp for
-        for (int i = 0; i < opts.size(); ++i) {
+        for (size_t i = 0; i < opts.size(); ++i) {
             const Option& opt = opts[i];
             GreekResult res;
 
@@ -126,7 +126,7 @@ std::vector<Greeks> PricingDispatcher::greeks(const std::vector<Option>& opts, i
     {
         BinomialWorkspace workspace(steps); //once per thread; no matter if european or american, there
         #pragma omp for
-        for (int i = 0; i < opts.size(); ++i) {
+        for (size_t i = 0; i < opts.size(); ++i) {
             const Option& opt = opts[i];
             Greeks res;
 
