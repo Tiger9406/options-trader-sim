@@ -38,7 +38,7 @@ void Client::on_resolve(beast::error_code ec, tcp::resolver::results_type result
 // handler that starts SSL handshake after TCP connection
 void Client::on_connect(beast::error_code ec, tcp::resolver::endpoint_type ep) {
     if (ec){
-        return std::cerr << "Connect Error: " << ec.message() << std::endl;
+        std::cerr << "Connect Error: " << ec.message() << std::endl;
         return;
     }
 
@@ -51,7 +51,7 @@ void Client::on_connect(beast::error_code ec, tcp::resolver::endpoint_type ep) {
 
 void Client::on_ssl_handshake(beast::error_code ec) {
     if (ec){
-        return std::cerr << "SSL Handshake Error: " << ec.message() << std::endl;
+        std::cerr << "SSL Handshake Error: " << ec.message() << std::endl;
         return;
     }
 
@@ -66,7 +66,7 @@ void Client::on_ssl_handshake(beast::error_code ec) {
 
 void Client::on_handshake(beast::error_code ec) {
     if (ec){
-        return std::cerr << "WebSocket Handshake Error: " << ec.message() << std::endl;
+        std::cerr << "WebSocket Handshake Error: " << ec.message() << std::endl;
         return;
     }
 
