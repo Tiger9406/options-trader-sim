@@ -26,6 +26,7 @@ add_compile_options(-O3 -march=native -Wall -Wextra -pedantic)
 # enable OpenMP & optimization flags for multi-core
 find_package(OpenMP REQUIRED)
 find_package(Boost REQUIRED)
+find_package(OpenSSL REQUIRED)
 
 file(GLOB_RECURSE SOURCES CONFIGURE_DEPENDS
         ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp
@@ -43,11 +44,13 @@ target_include_directories(core PUBLIC
 target_link_libraries(core
         PUBLIC Boost::headers
         PUBLIC OpenMP::OpenMP_CXX
+        PUBLIC OpenSSL::SSL
+        PUBLIC OpenSSL::Crypto
         PUBLIC pthread
 )
 
 # Main Executable
-add_executable(options_simulator src/StaticMain.cpp)
+add_executable(options_simulator src/main.cpp)
 target_link_libraries(options_simulator PRIVATE core)
 
 add_subdirectory(tests)
