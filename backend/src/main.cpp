@@ -29,6 +29,6 @@ int main(){
         data_manager->update_from_json(std::move(msg));
     });
 
-    client->run("www.deribit.com", "443", "BTC-2JAN26-90000-C");
+    client->run("test.deribit.com", "443", "BTC-2JAN26-90000-C");
     ioc->run();
 }

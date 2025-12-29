@@ -42,6 +42,12 @@ void Client::on_connect(beast::error_code ec, tcp::resolver::endpoint_type ep) {
         return;
     }
 
+    if(!SSL_set_tlsext_host_name(ws_.next_layer().native_handle(), host_.c_str())) {
+        ec = beast::error_code(static_cast<int>(::ERR_get_error()), net::error::get_ssl_category());
+        std::cerr << "SNI Error: " << ec.message() << std::endl;
+        return;
+    }
+
     // does SSL handshake
     ws_.next_layer().async_handshake(
         ssl::stream_base::client,
@@ -58,7 +64,7 @@ void Client::on_ssl_handshake(beast::error_code ec) {
     // websocket handshake
     ws_.async_handshake(
         host_, 
-        "/",
+        "/ws/api/v2",
         beast::bind_front_handler(&Client::on_handshake, shared_from_this())
     );
 }
@@ -71,10 +77,7 @@ void Client::on_handshake(beast::error_code ec) {
     }
 
     // send subscription msg
-    
-    // sub to specific ticker; should prolly customize this
-    // std::string sub_json = R"({"jsonrpc":"2.0","method":"public/subscribe","params":{"channels":["ticker.BTC-27DEC24-50000-C.100ms"]},"id":1})";
-    
+        
     ws_.async_write(
         net::buffer(subscription_msg_),
         [self = shared_from_this()](beast::error_code ec, std::size_t) {
