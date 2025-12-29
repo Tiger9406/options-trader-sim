@@ -1,4 +1,5 @@
 #include "api/Client.h"
+#include <boost/asio/strand.hpp>
 #include <iostream>
 
 namespace net = boost::asio;
@@ -22,7 +23,10 @@ void Client::run(const std::string& host, const std::string& port, const std::st
 }
 
 void Client::on_resolve(beast::error_code ec, tcp::resolver::results_type results) {
-    if (ec) return std::cerr << "Resolve Error: " << ec.message() << std::endl;
+    if (ec){ 
+        std::cerr << "Resolve Error: " << ec.message() << std::endl;
+        return;
+    }
 
     // connect to the resolved IP address
     beast::get_lowest_layer(ws_).async_connect(
@@ -33,7 +37,10 @@ void Client::on_resolve(beast::error_code ec, tcp::resolver::results_type result
 
 // handler that starts SSL handshake after TCP connection
 void Client::on_connect(beast::error_code ec, tcp::resolver::endpoint_type ep) {
-    if (ec) return std::cerr << "Connect Error: " << ec.message() << std::endl;
+    if (ec){
+        return std::cerr << "Connect Error: " << ec.message() << std::endl;
+        return;
+    }
 
     // does SSL handshake
     ws_.next_layer().async_handshake(
@@ -43,7 +50,10 @@ void Client::on_connect(beast::error_code ec, tcp::resolver::endpoint_type ep) {
 }
 
 void Client::on_ssl_handshake(beast::error_code ec) {
-    if (ec) return std::cerr << "SSL Handshake Error: " << ec.message() << std::endl;
+    if (ec){
+        return std::cerr << "SSL Handshake Error: " << ec.message() << std::endl;
+        return;
+    }
 
     // websocket handshake
     ws_.async_handshake(
@@ -55,7 +65,10 @@ void Client::on_ssl_handshake(beast::error_code ec) {
 
 
 void Client::on_handshake(beast::error_code ec) {
-    if (ec) return std::cerr << "WebSocket Handshake Error: " << ec.message() << std::endl;
+    if (ec){
+        return std::cerr << "WebSocket Handshake Error: " << ec.message() << std::endl;
+        return;
+    }
 
     // send subscription msg
     
