@@ -61,17 +61,13 @@ shift tree instead of recalculate
 cd backend
 
 # Create a build directory and run CMake
-mkdir -p build && cd build
-cmake ..
+cmake -B build -G Ninja
 
-# Build with all cores
-make -j$(nproc)
-
-# if macbook
-make -j$(sysctl -n hw.logicalcpu)
+#build project
+cmake --build build --parallel
 
 # Run the simulator
-./options_simulator
+./build/options_simulator
 ```
 
 ### Requirements (Ubuntu/WSL)
