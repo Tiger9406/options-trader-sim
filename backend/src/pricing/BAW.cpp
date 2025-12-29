@@ -17,7 +17,7 @@ static double calc_k(double r, double T, double sigma2) {
 }
 
 // Objective function for Newton's method to find Sx
-static double objective(double Sx, double S, double K, double r, double q, double sigma, double T, OptionType type) {
+static double objective(double Sx, double K, double r, double q, double sigma, double T, OptionType type) {
     if (Sx <= 0.0) return 1e100;
 
     double sigma2 = sigma*sigma;
@@ -44,20 +44,20 @@ static double objective(double Sx, double S, double K, double r, double q, doubl
 }
 
 // Numerical derivative for Newton's method
-static double derivative(double Sx, double S, double K, double r, double q, double sigma, double T, OptionType type, double h = 0.01) {
-    return (objective(Sx + h, S, K, r, q, sigma, T, type) - objective(Sx - h, S, K, r, q, sigma, T, type)) / (2.0 * h);
+static double derivative(double Sx, double K, double r, double q, double sigma, double T, OptionType type, double h = 0.01) {
+    return (objective(Sx + h, K, r, q, sigma, T, type) - objective(Sx - h, K, r, q, sigma, T, type)) / (2.0 * h);
 }
 
-static double second_derivative(double Sx, double S, double K, double r, double q, double sigma, double T, OptionType type, double h = 0.01) {
-    return (derivative(Sx + h, S, K, r, q, sigma, T, type) - derivative(Sx - h, S, K, r, q, sigma, T, type)) / (2.0 * h);
+static double second_derivative(double Sx, double K, double r, double q, double sigma, double T, OptionType type, double h = 0.01) {
+    return (derivative(Sx + h, K, r, q, sigma, T, type) - derivative(Sx - h, K, r, q, sigma, T, type)) / (2.0 * h);
 }
 //static int baw_fallback_counter = 0;
 // Newton's method to find critical Sx
-static double find_critical_Sx(double S, double K, double r, double q, double sigma, double T, OptionType type, int maxIterations, double tol) {
-    double Sx = S;
+static double find_critical_Sx(double K, double r, double q, double sigma, double T, OptionType type, int maxIterations, double tol) {
+    double Sx = K;
     for (int i = 0; i < maxIterations; i++) {
-        double f_prime = derivative(Sx, S, K, r, q, sigma, T, type);
-        double f_double_prime = second_derivative(Sx, S, K, r, q, sigma, T, type);
+        double f_prime = derivative(Sx, K, r, q, sigma, T, type);
+        double f_double_prime = second_derivative(Sx, K, r, q, sigma, T, type);
         double newSx = Sx - f_prime / f_double_prime;
         if (std::abs(newSx - Sx) < tol) // on event difference is so minimal
             return newSx;
@@ -80,7 +80,7 @@ double BAW::price(const Option& opt, int steps) {
 
     int maxIterations = steps;
     double tol = 1e-5;
-    double Sx = find_critical_Sx(S, K, r, q, sigma, T, type, maxIterations, tol);
+    double Sx = find_critical_Sx(K, r, q, sigma, T, type, maxIterations, tol);
     if(Sx==-1){
 //        std::cerr<<"Did not converge\n";
         return BinomialTree::price(opt, steps);
@@ -111,7 +111,7 @@ double BAW::priceParameters(double S, double K, double r, double sigma, double T
 
     int maxIterations = steps;
     double tol = 1e-5;
-    double Sx = find_critical_Sx(S, K, r, q, sigma, T, type, maxIterations, tol);
+    double Sx = find_critical_Sx(K, r, q, sigma, T, type, maxIterations, tol);
     if(Sx==-1){
 //        std::cerr<<"Did not converge\n";
         return BinomialTree::priceParameters(S, K, r, sigma, T, q, type, 1000);
