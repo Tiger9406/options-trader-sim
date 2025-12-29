@@ -10,6 +10,10 @@
 #include <boost/asio/ssl.hpp>
 #include <boost/beast/ssl.hpp>
 
+#include <string>
+#include <functional>
+#include <memory>
+
 namespace beast = boost::beast;         
 namespace websocket = beast::websocket; 
 namespace net = boost::asio;         
@@ -26,6 +30,8 @@ class Client : public std::enable_shared_from_this<Client> {
     std::function<void(std::string)> on_message_cb_;
     std::string subscription_msg_;
 
+    std::string host_;
+    std::string subscription_path_;
 public:
     explicit Client(net::io_context& ioc, ssl::context& ctx); //explicit to avoid implicit conversion
     void run(const std::string& host, const std::string& port, const std::string& subscription_path);
@@ -33,6 +39,7 @@ public:
     //async handlers
     void on_resolve(beast::error_code ec, tcp::resolver::results_type results);
     void on_connect(beast::error_code ec, tcp::resolver::endpoint_type ep);
+    void on_ssl_handshake(beast::error_code ec);
     void on_handshake(beast::error_code ec);
     void do_read();
     void on_read(beast::error_code ec, std::size_t bytes_transferred);
