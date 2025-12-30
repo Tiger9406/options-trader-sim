@@ -125,6 +125,8 @@ void DataManager::update_from_json(const std::string& raw_json) {
         double iv = data["mark_iv"];
         double mark = data["mark_price"];
 
+        // std::cout << "Received Update for " << instrument << ": Spot=" << spot << ", IV=" << iv << ", Mark=" << mark << "\n";
+
         {
             // locks the mutex; in this local scope created by {}; out of scope, destructed, unlocks
             std::lock_guard<std::mutex> lock(data_mutex_);
@@ -134,6 +136,7 @@ void DataManager::update_from_json(const std::string& raw_json) {
                 // update live strick price
                 batch_.S[idx] = spot; 
                 batch_.sigma[idx] = iv / 100.0;
+                std::cout<< "Updated Option [" << instrument << "] at index " << idx << "\n";
             }
         }
     } catch (const std::exception& e) {
